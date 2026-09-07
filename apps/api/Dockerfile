@@ -29,6 +29,11 @@ RUN npm ci --omit=dev --workspace=apps/api
 COPY --from=build /app/node_modules/.prisma node_modules/.prisma
 COPY --from=build /app/node_modules/@prisma/client node_modules/@prisma/client
 COPY --from=build /app/apps/api/dist apps/api/dist
+# schema.prisma + migrations/ are needed at runtime now: the entrypoint runs
+# `prisma migrate deploy` against them before starting the app.
+COPY apps/api/prisma apps/api/prisma
+COPY apps/api/docker-entrypoint.sh docker-entrypoint.sh
+RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 4000
-CMD ["node", "apps/api/dist/main.js"]
+CMD ["./docker-entrypoint.sh"]
