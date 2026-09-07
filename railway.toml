@@ -1,0 +1,13 @@
+# Config for the API service on Railway. Build context is the repository
+# root (same reason as apps/api/Dockerfile itself: npm workspaces need the
+# root lockfile) — set this service's Root Directory to "." in the Railway
+# dashboard.
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "apps/api/Dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
