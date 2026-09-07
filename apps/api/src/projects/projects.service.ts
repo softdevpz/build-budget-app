@@ -25,6 +25,8 @@ export class ProjectsService {
         userId,
         name: dto.name,
         address: dto.address,
+        region: dto.region,
+        areaM2: dto.areaM2,
         startDate: dto.startDate ? new Date(dto.startDate) : undefined,
         targetBudget: dto.targetBudget,
       },

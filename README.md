@@ -56,4 +56,5 @@ docker-compose.yml -> Postgres + Redis + Mailpit (dev SMTP catcher, UI at http:/
 - [x] Background jobs (BullMQ) — async PDF bank reports: `POST /projects/:id/reports`, `GET /projects/:id/reports[/:reportId]`
 - [x] Notifications — daily deadline check (BullMQ + `@nestjs/schedule`) emails a reminder for tasks due within 3 days; `POST /notifications/check-deadlines-now` to trigger on demand
 - [x] Billing (Stripe) — free plan limited to 1 project; `POST /billing/checkout-session`, `GET /billing/status`, `POST /billing/webhook`
+- [x] Benchmark stats — nightly anonymized cost-per-m² aggregation, cached in Redis; public `GET /benchmark[?region=&stageCategory=]`, `POST /benchmark/recompute-now`
 - [ ] Real-time collaboration (WebSockets)

@@ -26,6 +26,8 @@ model Project {
   user          User     @relation(fields: [userId], references: [id])
   name          String
   address       String?
+  region        String?
+  areaM2        Decimal?
   startDate     DateTime?
   targetBudget  Decimal?
   status        String   @default("in_progress")
@@ -116,4 +118,6 @@ model BenchmarkStat {
   avgCostPerM2  Decimal
   sampleSize    Int
   updatedAt     DateTime @updatedAt
+
+  @@unique([region, stageCategory])
 }
