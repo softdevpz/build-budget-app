@@ -17,9 +17,11 @@ function projectRoom(projectId: string): string {
   return `project:${projectId}`;
 }
 
-// CORS is wide open here because this is a portfolio dev setup; lock this down
-// to the real frontend origin before deploying anywhere public.
-@WebSocketGateway({ cors: { origin: '*' } })
+// Decorator arguments run at module-load time, before ConfigModule's dotenv
+// loading — so this only sees a real WEB_APP_URL where the host (Railway)
+// injects env vars directly into the process, not from a local .env file.
+// The fallback keeps local dev working either way.
+@WebSocketGateway({ cors: { origin: process.env.WEB_APP_URL ?? 'http://localhost:3000' } })
 export class ProjectsGateway implements OnGatewayConnection {
   private readonly logger = new Logger(ProjectsGateway.name);
 
