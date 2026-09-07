@@ -39,6 +39,29 @@ API health check: http://localhost:4000/health
 
 To test Stripe webhooks locally, forward events with the [Stripe CLI](https://docs.stripe.com/stripe-cli): `stripe listen --forward-to localhost:4000/billing/webhook` (its output gives you `STRIPE_WEBHOOK_SECRET`).
 
+## Testing
+
+Unit tests (`*.spec.ts`, mocked dependencies, no database):
+
+```bash
+npm run test:api
+```
+
+End-to-end tests (`test/*.e2e-spec.ts`) boot the real app and hit real HTTP endpoints against a **separate** database, so they never touch your dev data. One-time setup:
+
+```bash
+docker exec build-budget-app-postgres-1 psql -U budget_app -d postgres -c "CREATE DATABASE budget_app_test;"
+cd apps/api
+DATABASE_URL="postgresql://budget_app:budget_app_dev@localhost:5432/budget_app_test?schema=public" npx prisma migrate deploy
+cd ../..
+```
+
+Then, any time:
+
+```bash
+npm run test:api:e2e
+```
+
 ## Project structure
 
 ```
