@@ -1,8 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Expense } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProjectsService } from '../projects/projects.service';
 import { StagesService } from '../stages/stages.service';
+import { PROJECT_ACTIVITY_EVENT } from '../common/project-activity.event';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 
@@ -12,6 +14,7 @@ export class ExpensesService {
     private readonly prisma: PrismaService,
     private readonly projectsService: ProjectsService,
     private readonly stagesService: StagesService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(userId: string, projectId: string, dto: CreateExpenseDto) {
@@ -19,7 +22,7 @@ export class ExpensesService {
     if (dto.stageId) {
       await this.stagesService.findOwned(userId, projectId, dto.stageId);
     }
-    return this.prisma.expense.create({
+    const expense = await this.prisma.expense.create({
       data: {
         projectId,
         stageId: dto.stageId,
@@ -32,6 +35,8 @@ export class ExpensesService {
         invoiceFileUrl: dto.invoiceFileUrl,
       },
     });
+    this.emit(projectId, 'expense.created', expense);
+    return expense;
   }
 
   async findAll(userId: string, projectId: string, stageId?: string) {
@@ -51,18 +56,21 @@ export class ExpensesService {
     if (dto.stageId) {
       await this.stagesService.findOwned(userId, projectId, dto.stageId);
     }
-    return this.prisma.expense.update({
+    const expense = await this.prisma.expense.update({
       where: { id: expenseId },
       data: {
         ...dto,
         date: dto.date ? new Date(dto.date) : undefined,
       },
     });
+    this.emit(projectId, 'expense.updated', expense);
+    return expense;
   }
 
   async remove(userId: string, projectId: string, expenseId: string) {
     await this.findOwned(userId, projectId, expenseId);
     await this.prisma.expense.delete({ where: { id: expenseId } });
+    this.emit(projectId, 'expense.deleted', { id: expenseId });
   }
 
   private async findOwned(userId: string, projectId: string, expenseId: string): Promise<Expense> {
@@ -72,5 +80,9 @@ export class ExpensesService {
       throw new NotFoundException('Expense not found');
     }
     return expense;
+  }
+
+  private emit(projectId: string, type: string, payload: unknown) {
+    this.eventEmitter.emit(PROJECT_ACTIVITY_EVENT, { projectId, type, payload });
   }
 }

@@ -18,6 +18,7 @@ model User {
 
   projects            Project[]
   subscription        Subscription?
+  projectMemberships  ProjectMember[]
 }
 
 model Project {
@@ -38,6 +39,19 @@ model Project {
   documents     Document[]
   tasks         TaskItem[]
   reports       Report[]
+  members       ProjectMember[]
+}
+
+model ProjectMember {
+  id        String   @id @default(uuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  role      String   @default("editor") // "owner" | "editor"
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, userId])
 }
 
 model Stage {
