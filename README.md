@@ -62,6 +62,20 @@ Then, any time:
 npm run test:api:e2e
 ```
 
+## Docker (production build)
+
+```bash
+# from the repository root — the API image needs the root lockfile
+docker build -f apps/api/Dockerfile -t build-budget-app-api .
+docker run -p 4000:4000 --env-file apps/api/.env build-budget-app-api
+```
+
+Multi-stage build on `node:20-slim` (not `alpine` — Prisma's query engine needs glibc/OpenSSL and fails on musl with an obscure `libssl.so.1.1` error). `npm ci` is scoped to `--workspace=apps/api` so the image doesn't carry `apps/web`'s dependencies (Next.js, React, ...) it never uses.
+
+## CI
+
+`.github/workflows/ci.yml` runs on every push/PR to `main`: Postgres + Redis as service containers, Prisma migrations, unit tests (with the 80% coverage thresholds below), e2e tests, and a build of both apps.
+
 ## Project structure
 
 ```
