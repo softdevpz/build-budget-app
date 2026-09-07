@@ -10,6 +10,7 @@
     "build:web": "npm run build -w apps/web",
     "build:api": "npm run build -w apps/api",
     "test:api": "npm run test -w apps/api",
+    "test:api:cov": "npm run test:cov -w apps/api",
     "test:api:e2e": "npm run test:e2e -w apps/api",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down"

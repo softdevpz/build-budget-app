@@ -7,6 +7,7 @@
     "build": "nest build",
     "start:prod": "node dist/main",
     "test": "jest",
+    "test:cov": "jest --coverage",
     "test:e2e": "jest --config ./test/jest-e2e.json --runInBand"
   },
   "dependencies": {
@@ -62,8 +63,21 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "moduleFileExtensions": ["js", "json", "ts"],
-    "collectCoverageFrom": ["**/*.(t|j)s"],
+    "collectCoverageFrom": [
+      "**/*.(t|j)s",
+      "!**/*.module.ts",
+      "!**/*.dto.ts",
+      "!**/*.constants.ts",
+      "!**/*.type.ts",
+      "!main.ts"
+    ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "coverageThreshold": {
+      "**/auth/auth.service.ts": { "statements": 80, "branches": 80, "functions": 80, "lines": 80 },
+      "**/projects/projects.service.ts": { "statements": 80, "branches": 80, "functions": 80, "lines": 80 },
+      "**/benchmark/benchmark.service.ts": { "statements": 80, "branches": 80, "functions": 80, "lines": 80 },
+      "**/reports/report-pdf.builder.ts": { "statements": 80, "branches": 80, "functions": 80, "lines": 80 }
+    }
   }
 }
