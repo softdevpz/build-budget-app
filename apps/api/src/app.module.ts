@@ -13,8 +13,8 @@ import { ReportsModule } from './reports/reports.module';
 import { TasksModule } from './tasks/tasks.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { BillingModule } from './billing/billing.module';
-
-// Planned modules: BenchmarkModule
+import { RedisModule } from './redis/redis.module';
+import { BenchmarkModule } from './benchmark/benchmark.module';
 
 @Module({
   imports: [
@@ -27,6 +27,7 @@ import { BillingModule } from './billing/billing.module';
       },
     }),
     PrismaModule,
+    RedisModule,
     AuthModule,
     ProjectsModule,
     StagesModule,
@@ -36,6 +37,7 @@ import { BillingModule } from './billing/billing.module';
     TasksModule,
     NotificationsModule,
     BillingModule,
+    BenchmarkModule,
   ],
   controllers: [AppController],
 })

@@ -10,6 +10,15 @@ export class CreateProjectDto {
   address?: string;
 
   @IsOptional()
+  @IsString()
+  region?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  areaM2?: number;
+
+  @IsOptional()
   @IsISO8601()
   startDate?: string;
 
