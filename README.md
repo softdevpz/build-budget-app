@@ -4,6 +4,8 @@ A budgeting and documentation tracker for people managing a house construction p
 
 Monorepo: Next.js (`apps/web`) + Nest.js (`apps/api`), PostgreSQL + Redis via Docker.
 
+**Live:** [build-budget-app-web.vercel.app](https://build-budget-app-web.vercel.app) (frontend, Vercel) · API on Railway.
+
 ## Stack
 
 - **Frontend:** Next.js (App Router), TypeScript, Tailwind CSS, TanStack Query, Recharts
@@ -87,6 +89,8 @@ docker-compose.yml -> Postgres + Redis + Mailpit (dev SMTP catcher, UI at http:/
 
 ## Status
 
+### Backend (`apps/api`)
+
 - [x] Auth (JWT + refresh tokens) — `POST /auth/register`, `/login`, `/refresh`, `/logout`
 - [x] Projects / Stages / Expenses CRUD — `/projects`, `/projects/:id/stages`, `/projects/:id/expenses`, `/projects/:id/summary`
 - [x] Document uploads (S3 presigned URLs) — `/projects/:id/documents`, `/documents/presign`
@@ -95,3 +99,13 @@ docker-compose.yml -> Postgres + Redis + Mailpit (dev SMTP catcher, UI at http:/
 - [x] Billing (Stripe) — free plan limited to 1 project; `POST /billing/checkout-session`, `GET /billing/status`, `POST /billing/webhook`
 - [x] Benchmark stats — nightly anonymized cost-per-m² aggregation, cached in Redis; public `GET /benchmark[?region=&stageCategory=]`, `POST /benchmark/recompute-now`
 - [x] Real-time collaboration (WebSockets) — project sharing (`POST /projects/:id/members`, owner/editor roles) + a Socket.io gateway that pushes live stage/expense changes to everyone viewing that project
+
+### Frontend (`apps/web`)
+
+- [x] Auth foundation — login/register pages, httpOnly-cookie sessions via Next.js Route Handlers (`/api/auth/*`), a generic authenticated proxy (`/api/proxy/*`) with silent token refresh, route protection (`src/proxy.ts`)
+- [ ] Core budget UI — project list/create, stages, expenses, budget summary charts
+- [ ] Documents & reports UI
+- [ ] Collaboration & real-time UI
+- [ ] Billing UI
+- [ ] Benchmark & tasks UI
+- [ ] Bilingual UI (PL/EN)
