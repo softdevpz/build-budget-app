@@ -10,6 +10,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { StagesModule } from './stages/stages.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { DocumentsModule } from './documents/documents.module';
+import { DiaryModule } from './diary/diary.module';
 import { ReportsModule } from './reports/reports.module';
 import { TasksModule } from './tasks/tasks.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -37,6 +38,7 @@ import { RealtimeModule } from './realtime/realtime.module';
     StagesModule,
     ExpensesModule,
     DocumentsModule,
+    DiaryModule,
     ReportsModule,
     TasksModule,
     NotificationsModule,
