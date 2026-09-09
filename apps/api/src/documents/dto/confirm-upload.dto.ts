@@ -1,4 +1,4 @@
-import { IsIn, IsString, MinLength } from 'class-validator';
+import { IsIn, IsOptional, IsString, MinLength } from 'class-validator';
 import { DOCUMENT_TYPES, DocumentType } from './presign-upload.dto';
 
 export class ConfirmUploadDto {
@@ -8,4 +8,8 @@ export class ConfirmUploadDto {
 
   @IsIn(DOCUMENT_TYPES)
   type!: DocumentType;
+
+  @IsOptional()
+  @IsString()
+  stageId?: string;
 }

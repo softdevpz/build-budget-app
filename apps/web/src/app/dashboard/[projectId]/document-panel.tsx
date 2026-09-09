@@ -3,7 +3,7 @@
 import { useRef, useState, FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
-import { DOCUMENT_TYPES, type DocumentType, type ProjectDocument } from "@/lib/types";
+import { DOCUMENT_TYPES, type DocumentType, type ProjectDocument, type Stage } from "@/lib/types";
 
 const TYPE_LABELS: Record<DocumentType, string> = {
   invoice: "Faktura",
@@ -14,9 +14,11 @@ const TYPE_LABELS: Record<DocumentType, string> = {
 export function DocumentPanel({
   projectId,
   initialDocuments,
+  stages,
 }: {
   projectId: string;
   initialDocuments: ProjectDocument[];
+  stages: Stage[];
 }) {
   const queryClient = useQueryClient();
   const queryKey = ["documents", projectId];
@@ -29,6 +31,7 @@ export function DocumentPanel({
   });
 
   const [type, setType] = useState<DocumentType>("invoice");
+  const [stageId, setStageId] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   function invalidate() {
@@ -57,12 +60,13 @@ export function DocumentPanel({
 
       return apiFetch<ProjectDocument>(`/projects/${projectId}/documents`, {
         method: "POST",
-        body: { key, type },
+        body: { key, type, stageId: stageId || undefined },
       });
     },
     onSuccess: () => {
       setError(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      setStageId("");
       invalidate();
     },
     onError: (err) =>
@@ -80,6 +84,11 @@ export function DocumentPanel({
     const file = fileInputRef.current?.files?.[0];
     if (!file) return;
     uploadDocument.mutate(file);
+  }
+
+  function stageName(id: string | null) {
+    if (!id) return null;
+    return stages.find((s) => s.id === id)?.name ?? null;
   }
 
   return (
@@ -100,6 +109,7 @@ export function DocumentPanel({
                 </a>
                 <p className="text-xs text-gray-500">
                   {new Date(document.uploadedAt).toLocaleDateString("pl-PL")}
+                  {stageName(document.stageId) ? ` · ${stageName(document.stageId)}` : ""}
                 </p>
               </div>
               <button
@@ -126,6 +136,21 @@ export function DocumentPanel({
             {DOCUMENT_TYPES.map((value) => (
               <option key={value} value={value}>
                 {TYPE_LABELS[value]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs text-gray-700">Etap</span>
+          <select
+            value={stageId}
+            onChange={(e) => setStageId(e.target.value)}
+            className="rounded border border-gray-300 px-2 py-1 text-sm"
+          >
+            <option value="">Bez etapu</option>
+            {stages.map((stage) => (
+              <option key={stage.id} value={stage.id}>
+                {stage.name}
               </option>
             ))}
           </select>

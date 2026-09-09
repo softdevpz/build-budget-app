@@ -3,7 +3,7 @@
 import { useState, FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
-import type { Stage, StageStatus } from "@/lib/types";
+import type { ProjectSummary, Stage, StageStatus } from "@/lib/types";
 
 const STATUS_LABELS: Record<StageStatus, string> = {
   pending: "Zaplanowany",
@@ -11,7 +11,19 @@ const STATUS_LABELS: Record<StageStatus, string> = {
   done: "Zakończony",
 };
 
-export function StagePanel({ projectId, initialStages }: { projectId: string; initialStages: Stage[] }) {
+// Mirrors the "X% budżetu etapu wykorzystane" warning pattern from Staveo —
+// surface the overrun before/as it happens, not just in the final total.
+const BUDGET_WARNING_THRESHOLD = 0.9;
+
+export function StagePanel({
+  projectId,
+  initialStages,
+  summary,
+}: {
+  projectId: string;
+  initialStages: Stage[];
+  summary: ProjectSummary;
+}) {
   const queryClient = useQueryClient();
   const queryKey = ["stages", projectId];
 
@@ -66,6 +78,22 @@ export function StagePanel({ projectId, initialStages }: { projectId: string; in
     createStage.mutate();
   }
 
+  function budgetWarning(stage: Stage): { message: string; isOver: boolean } | null {
+    if (!stage.plannedBudget) return null;
+    const spent = summary.stages.find((s) => s.id === stage.id)?.spent ?? 0;
+    const planned = Number(stage.plannedBudget);
+    const ratio = spent / planned;
+    if (ratio < BUDGET_WARNING_THRESHOLD) return null;
+    const pct = Math.round(ratio * 100);
+    return {
+      isOver: ratio >= 1,
+      message:
+        ratio >= 1
+          ? `Przekroczono budżet etapu — wykorzystano ${pct}%`
+          : `${pct}% budżetu etapu wykorzystane, zbliżasz się do limitu`,
+    };
+  }
+
   return (
     <section>
       <h2 className="mb-3 text-lg font-semibold">Etapy</h2>
@@ -73,7 +101,9 @@ export function StagePanel({ projectId, initialStages }: { projectId: string; in
         <p className="mb-4 text-sm text-gray-500">Brak etapów.</p>
       ) : (
         <ul className="mb-4 flex flex-col gap-2">
-          {stages.map((stage) => (
+          {stages.map((stage) => {
+            const warning = budgetWarning(stage);
+            return (
             <li
               key={stage.id}
               className="flex items-center justify-between rounded border border-gray-200 px-3 py-2"
@@ -83,6 +113,11 @@ export function StagePanel({ projectId, initialStages }: { projectId: string; in
                 {stage.plannedBudget && (
                   <p className="text-xs text-gray-500">
                     Planowane: {Number(stage.plannedBudget).toLocaleString("pl-PL")} PLN
+                  </p>
+                )}
+                {warning && (
+                  <p className={`text-xs ${warning.isOver ? "text-red-600" : "text-amber-600"}`}>
+                    {warning.message}
                   </p>
                 )}
               </div>
@@ -110,7 +145,8 @@ export function StagePanel({ projectId, initialStages }: { projectId: string; in
                 </button>
               </div>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
 
