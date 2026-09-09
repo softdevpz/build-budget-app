@@ -67,6 +67,7 @@ model Stage {
   status        String   @default("pending")
 
   expenses      Expense[]
+  documents     Document[]
   tasks         TaskItem[]
 }
 
@@ -90,6 +91,8 @@ model Document {
   id         String   @id @default(uuid())
   projectId  String
   project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stageId    String?
+  stage      Stage?   @relation(fields: [stageId], references: [id])
   type       String
   fileUrl    String
   uploadedAt DateTime @default(now())

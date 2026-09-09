@@ -49,6 +49,7 @@ export type DocumentType = (typeof DOCUMENT_TYPES)[number];
 export interface ProjectDocument {
   id: string;
   projectId: string;
+  stageId: string | null;
   type: DocumentType;
   fileUrl: string;
   uploadedAt: string;

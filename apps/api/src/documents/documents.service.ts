@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProjectsService } from '../projects/projects.service';
+import { StagesService } from '../stages/stages.service';
 import { S3Service } from '../storage/s3.service';
 import { PresignUploadDto } from './dto/presign-upload.dto';
 import { ConfirmUploadDto } from './dto/confirm-upload.dto';
@@ -15,6 +16,7 @@ export class DocumentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly projectsService: ProjectsService,
+    private readonly stagesService: StagesService,
     private readonly s3Service: S3Service,
   ) {}
 
@@ -27,8 +29,11 @@ export class DocumentsService {
 
   async confirmUpload(userId: string, projectId: string, dto: ConfirmUploadDto) {
     await this.projectsService.findOwned(userId, projectId);
+    if (dto.stageId) {
+      await this.stagesService.findOwned(userId, projectId, dto.stageId);
+    }
     return this.prisma.document.create({
-      data: { projectId, type: dto.type, fileUrl: dto.key },
+      data: { projectId, stageId: dto.stageId, type: dto.type, fileUrl: dto.key },
     });
   }
 

@@ -149,7 +149,7 @@ export function ProjectWorkspace({
       </div>
 
       <div className="mb-8">
-        <StagePanel projectId={projectId} initialStages={stages} />
+        <StagePanel projectId={projectId} initialStages={stages} summary={summary} />
       </div>
 
       <div className="mb-8">
@@ -157,7 +157,7 @@ export function ProjectWorkspace({
       </div>
 
       <div className="mb-8">
-        <DocumentPanel projectId={projectId} initialDocuments={initialDocuments} />
+        <DocumentPanel projectId={projectId} initialDocuments={initialDocuments} stages={stages} />
       </div>
 
       <ReportPanel projectId={projectId} initialReports={initialReports} />
