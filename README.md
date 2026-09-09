@@ -96,7 +96,7 @@ docker-compose.yml -> Postgres + Redis + Mailpit (dev SMTP catcher, UI at http:/
 
 ### Backend (`apps/api`)
 
-- [x] Auth (JWT + refresh tokens, email verification required before login, password policy) — `POST /auth/register`, `/login`, `/refresh`, `/logout`, `/verify-email`, `/resend-verification`. SMTP: Mailpit locally, [Resend](https://resend.com) in production.
+- [x] Auth (JWT + refresh tokens, email verification required before login, password policy) — `POST /auth/register`, `/login`, `/refresh`, `/logout`, `/verify-email`, `/resend-verification`. Mail: SMTP to Mailpit locally, [Resend](https://resend.com)'s HTTPS API in production (Railway blocks outbound SMTP).
 - [x] Projects / Stages / Expenses CRUD — `/projects`, `/projects/:id/stages`, `/projects/:id/expenses`, `/projects/:id/summary`
 - [x] Document uploads (S3 presigned URLs) — `/projects/:id/documents`, `/documents/presign`
 - [x] Background jobs (BullMQ) — async PDF bank reports: `POST /projects/:id/reports`, `GET /projects/:id/reports[/:reportId]`
