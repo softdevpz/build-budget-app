@@ -84,6 +84,11 @@ Multi-stage build on `node:20-slim` (not `alpine` — Prisma's query engine need
 apps/
   web/    -> Next.js (App Router, TS, Tailwind, React Query, Recharts)
   api/    -> Nest.js (Prisma, PostgreSQL, Redis/BullMQ, JWT auth)
+packages/
+  shared/ -> Code shared between web and api (currently: password policy). Has its own
+             build step (`npm run build:shared`) — both `dev:*`/`build:*` scripts run it
+             automatically, but if you edit packages/shared while a dev server is already
+             running, rebuild it and restart the server manually.
 docker-compose.yml -> Postgres + Redis + Mailpit (dev SMTP catcher, UI at http://localhost:8025) for local development
 ```
 
@@ -91,7 +96,7 @@ docker-compose.yml -> Postgres + Redis + Mailpit (dev SMTP catcher, UI at http:/
 
 ### Backend (`apps/api`)
 
-- [x] Auth (JWT + refresh tokens) — `POST /auth/register`, `/login`, `/refresh`, `/logout`
+- [x] Auth (JWT + refresh tokens, email verification required before login, password policy) — `POST /auth/register`, `/login`, `/refresh`, `/logout`, `/verify-email`, `/resend-verification`. SMTP: Mailpit locally, [Resend](https://resend.com) in production.
 - [x] Projects / Stages / Expenses CRUD — `/projects`, `/projects/:id/stages`, `/projects/:id/expenses`, `/projects/:id/summary`
 - [x] Document uploads (S3 presigned URLs) — `/projects/:id/documents`, `/documents/presign`
 - [x] Background jobs (BullMQ) — async PDF bank reports: `POST /projects/:id/reports`, `GET /projects/:id/reports[/:reportId]`

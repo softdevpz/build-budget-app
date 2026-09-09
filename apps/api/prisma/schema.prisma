@@ -12,6 +12,9 @@ model User {
   email               String   @unique
   passwordHash        String
   hashedRefreshToken  String?
+  emailVerifiedAt            DateTime?
+  emailVerificationTokenHash String?   @unique
+  emailVerificationExpiresAt DateTime?
   plan                String   @default("free")
   stripeCustomerId    String?
   createdAt           DateTime @default(now())

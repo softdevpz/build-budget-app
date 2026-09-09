@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { PasswordInput } from "@/components/password-input";
+import { PASSWORD_POLICY_PATTERN } from "@build-budget-app/shared";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registered, setRegistered] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -26,12 +27,24 @@ export default function RegisterPage() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => null);
-      setError(data?.message ?? "Nie udało się utworzyć konta");
+      const message = Array.isArray(data?.message) ? data.message.join(", ") : data?.message;
+      setError(message ?? "Nie udało się utworzyć konta");
       return;
     }
 
-    router.push("/dashboard");
-    router.refresh();
+    setRegistered(true);
+  }
+
+  if (registered) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4 text-center">
+        <h1 className="mb-4 text-2xl font-semibold">Sprawdź swoją skrzynkę e-mail</h1>
+        <p className="text-gray-600">
+          Wysłaliśmy link potwierdzający na <strong>{email}</strong>. Kliknij go, żeby dokończyć rejestrację i się
+          zalogować.
+        </p>
+      </main>
+    );
   }
 
   return (
@@ -49,15 +62,17 @@ export default function RegisterPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">Hasło (min. 8 znaków)</span>
-          <input
-            type="password"
+          <span className="text-sm text-gray-700">Hasło</span>
+          <PasswordInput
             required
             minLength={8}
+            pattern={PASSWORD_POLICY_PATTERN}
+            title="Minimum 8 znaków, w tym co najmniej jedna cyfra i jeden znak specjalny"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2"
+            className="w-full rounded border border-gray-300 px-3 py-2"
           />
+          <span className="text-xs text-gray-500">Min. 8 znaków, co najmniej 1 cyfra i 1 znak specjalny</span>
         </label>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button

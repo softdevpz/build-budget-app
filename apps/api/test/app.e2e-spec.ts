@@ -2,6 +2,9 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { PrismaService } from '../src/prisma/prisma.service';
+
+const DEFAULT_PASSWORD = 'supersecret123!';
 
 function uniqueEmail(label: string): string {
   return `e2e-${label}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -9,6 +12,7 @@ function uniqueEmail(label: string): string {
 
 describe('App (e2e)', () => {
   let app: INestApplication;
+  let prisma: PrismaService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -18,11 +22,27 @@ describe('App (e2e)', () => {
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
     await app.init();
+
+    prisma = moduleFixture.get(PrismaService);
   });
 
   afterAll(async () => {
     await app.close();
   });
+
+  // Registration only sends a verification email — there's no inbox to read
+  // in this test environment, so we mark the account verified directly via
+  // Prisma, the same way clicking the email link would via /auth/verify-email.
+  async function registerAndVerify(email: string, password = DEFAULT_PASSWORD) {
+    await request(app.getHttpServer()).post('/auth/register').send({ email, password }).expect(201);
+    await prisma.user.update({ where: { email }, data: { emailVerifiedAt: new Date() } });
+  }
+
+  async function registerVerifyAndLogin(email: string, password = DEFAULT_PASSWORD): Promise<string> {
+    await registerAndVerify(email, password);
+    const res = await request(app.getHttpServer()).post('/auth/login').send({ email, password }).expect(200);
+    return res.body.accessToken;
+  }
 
   it('GET /health', () => {
     return request(app.getHttpServer()).get('/health').expect(200).expect({ status: 'ok', service: 'api' });
@@ -30,32 +50,70 @@ describe('App (e2e)', () => {
 
   describe('auth', () => {
     const email = uniqueEmail('auth');
-    const password = 'supersecret123';
 
-    it('registers a new user', async () => {
+    it('registers a new user but does not log them in yet', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ email, password })
+        .send({ email, password: DEFAULT_PASSWORD })
         .expect(201);
 
-      expect(res.body).toHaveProperty('accessToken');
-      expect(res.body).toHaveProperty('refreshToken');
+      expect(res.body).not.toHaveProperty('accessToken');
+      expect(res.body.message).toMatch(/verify/i);
     });
 
     it('rejects registering the same email twice', () => {
-      return request(app.getHttpServer()).post('/auth/register').send({ email, password }).expect(409);
+      return request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email, password: DEFAULT_PASSWORD })
+        .expect(409);
     });
 
-    it('rejects login with the wrong password', () => {
+    it('rejects a password with no digit or special character', () => {
+      return request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: uniqueEmail('weak-pw'), password: 'onlylowercase' })
+        .expect(400);
+    });
+
+    it('rejects login before the email is verified', () => {
       return request(app.getHttpServer())
         .post('/auth/login')
-        .send({ email, password: 'wrong-password' })
+        .send({ email, password: DEFAULT_PASSWORD })
+        .expect(403);
+    });
+
+    it('rejects an invalid verification token', () => {
+      return request(app.getHttpServer()).post('/auth/verify-email').send({ token: 'not-a-real-token' }).expect(400);
+    });
+
+    it('rejects login with the wrong password (once verified)', async () => {
+      await prisma.user.update({ where: { email }, data: { emailVerifiedAt: new Date() } });
+
+      return request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email, password: 'wrong-password1!' })
         .expect(401);
     });
 
-    it('logs in with the correct password', async () => {
-      const res = await request(app.getHttpServer()).post('/auth/login').send({ email, password }).expect(200);
+    it('logs in with the correct password once verified', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email, password: DEFAULT_PASSWORD })
+        .expect(200);
       expect(res.body).toHaveProperty('accessToken');
+    });
+
+    it('resend-verification always responds the same way, whether or not the email exists', async () => {
+      const knownRes = await request(app.getHttpServer())
+        .post('/auth/resend-verification')
+        .send({ email })
+        .expect(200);
+      const unknownRes = await request(app.getHttpServer())
+        .post('/auth/resend-verification')
+        .send({ email: uniqueEmail('ghost') })
+        .expect(200);
+
+      expect(knownRes.body).toEqual(unknownRes.body);
     });
   });
 
@@ -67,21 +125,10 @@ describe('App (e2e)', () => {
     let projectId: string;
 
     beforeAll(async () => {
-      const owner = await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({ email: uniqueEmail('owner'), password: 'supersecret123' });
-      ownerToken = owner.body.accessToken;
-
+      ownerToken = await registerVerifyAndLogin(uniqueEmail('owner'));
       memberEmail = uniqueEmail('member');
-      const member = await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({ email: memberEmail, password: 'supersecret123' });
-      memberToken = member.body.accessToken;
-
-      const stranger = await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({ email: uniqueEmail('stranger'), password: 'supersecret123' });
-      strangerToken = stranger.body.accessToken;
+      memberToken = await registerVerifyAndLogin(memberEmail);
+      strangerToken = await registerVerifyAndLogin(uniqueEmail('stranger'));
     });
 
     it('rejects unauthenticated requests', () => {
