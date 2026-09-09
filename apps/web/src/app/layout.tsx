@@ -2,6 +2,7 @@ import Link from "next/link";
 import "./globals.css";
 import { getAccessToken } from "@/lib/cookies";
 import { LogoutButton } from "@/components/logout-button";
+import { Providers } from "./providers";
 
 export const metadata = {
   title: "Budżet budowy",
@@ -38,7 +39,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             )}
           </nav>
         </header>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

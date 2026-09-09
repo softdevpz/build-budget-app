@@ -1,8 +1,8 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { callNestApi } from "@/lib/api-server";
 import { getAccessToken } from "@/lib/cookies";
-
-type Project = { id: string; name: string };
+import type { Project } from "@/lib/types";
 
 export default async function DashboardPage() {
   const token = await getAccessToken();
@@ -10,27 +10,37 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // Called directly (not through /api/proxy) — Server Components render on
-  // Vercel's server already, so there's no browser round-trip to save here.
   const { status, data } = await callNestApi("/projects", { token });
   const projects = status === 200 ? (data as Project[]) : [];
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="mb-4 text-2xl font-semibold">Pulpit</h1>
-      <p className="text-gray-600">
-        Zalogowano poprawnie. Masz {projects.length} {projects.length === 1 ? "projekt" : "projektów"}.
-      </p>
-      {projects.length > 0 && (
-        <ul className="mt-4 list-disc pl-5">
+    <main className="mx-auto max-w-3xl px-4 py-12">
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Twoje projekty</h1>
+        <Link href="/dashboard/new" className="rounded bg-gray-900 px-4 py-2 text-sm text-white">
+          Nowy projekt
+        </Link>
+      </div>
+
+      {projects.length === 0 ? (
+        <p className="text-gray-600">
+          Nie masz jeszcze żadnego projektu. Załóż pierwszy, żeby zacząć śledzić budżet budowy.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-3">
           {projects.map((project) => (
-            <li key={project.id}>{project.name}</li>
+            <li key={project.id}>
+              <Link
+                href={`/dashboard/${project.id}`}
+                className="block rounded border border-gray-200 px-4 py-3 hover:border-gray-400"
+              >
+                <p className="font-medium">{project.name}</p>
+                {project.address && <p className="text-sm text-gray-500">{project.address}</p>}
+              </Link>
+            </li>
           ))}
         </ul>
       )}
-      <p className="mt-6 text-sm text-gray-500">
-        Prawdziwy interfejs do zarządzania projektami, etapami i wydatkami wchodzi w kolejnej fazie.
-      </p>
     </main>
   );
 }
