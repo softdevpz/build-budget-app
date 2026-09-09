@@ -3,6 +3,8 @@
   "private": true,
   "version": "0.0.1",
   "scripts": {
+    "prebuild": "npm --prefix ../../packages/shared run build",
+    "predev": "npm --prefix ../../packages/shared run build",
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
@@ -12,7 +14,8 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "@tanstack/react-query": "^5.51.0",
-    "recharts": "^2.12.7"
+    "recharts": "^2.12.7",
+    "@build-budget-app/shared": "*"
   },
   "devDependencies": {
     "typescript": "^5.5.0",
