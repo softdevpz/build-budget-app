@@ -4,10 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
-import type { Expense, Project, ProjectSummary, Stage } from "@/lib/types";
+import type { Expense, Project, ProjectDocument, ProjectSummary, Report, Stage } from "@/lib/types";
 import { BudgetChart } from "./budget-chart";
 import { StagePanel } from "./stage-panel";
 import { ExpensePanel } from "./expense-panel";
+import { DocumentPanel } from "./document-panel";
+import { ReportPanel } from "./report-panel";
 
 export function ProjectWorkspace({
   projectId,
@@ -15,12 +17,16 @@ export function ProjectWorkspace({
   initialSummary,
   initialStages,
   initialExpenses,
+  initialDocuments,
+  initialReports,
 }: {
   projectId: string;
   initialProject: Project;
   initialSummary: ProjectSummary;
   initialStages: Stage[];
   initialExpenses: Expense[];
+  initialDocuments: ProjectDocument[];
+  initialReports: Report[];
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -146,7 +152,15 @@ export function ProjectWorkspace({
         <StagePanel projectId={projectId} initialStages={stages} />
       </div>
 
-      <ExpensePanel projectId={projectId} initialExpenses={initialExpenses} stages={stages} />
+      <div className="mb-8">
+        <ExpensePanel projectId={projectId} initialExpenses={initialExpenses} stages={stages} />
+      </div>
+
+      <div className="mb-8">
+        <DocumentPanel projectId={projectId} initialDocuments={initialDocuments} />
+      </div>
+
+      <ReportPanel projectId={projectId} initialReports={initialReports} />
     </main>
   );
 }

@@ -42,3 +42,28 @@ export interface ProjectSummary {
   stages: { id: string; name: string; plannedBudget: number | null; spent: number }[];
   unassignedSpent: number;
 }
+
+export const DOCUMENT_TYPES = ["invoice", "contract", "photo"] as const;
+export type DocumentType = (typeof DOCUMENT_TYPES)[number];
+
+export interface ProjectDocument {
+  id: string;
+  projectId: string;
+  type: DocumentType;
+  fileUrl: string;
+  uploadedAt: string;
+  downloadUrl: string;
+}
+
+export type ReportStatus = "pending" | "completed" | "failed";
+
+export interface Report {
+  id: string;
+  projectId: string;
+  status: ReportStatus;
+  fileUrl: string | null;
+  error: string | null;
+  requestedAt: string;
+  completedAt: string | null;
+  downloadUrl?: string;
+}
