@@ -3,6 +3,8 @@
   "private": true,
   "version": "0.0.1",
   "scripts": {
+    "prebuild": "npm --prefix ../../packages/shared run build",
+    "prestart:dev": "npm --prefix ../../packages/shared run build",
     "start:dev": "nest start --watch",
     "build": "nest build",
     "start:prod": "node dist/main",

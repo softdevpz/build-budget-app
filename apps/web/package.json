@@ -3,6 +3,8 @@
   "private": true,
   "version": "0.0.1",
   "scripts": {
+    "prebuild": "npm --prefix ../../packages/shared run build",
+    "predev": "npm --prefix ../../packages/shared run build",
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
