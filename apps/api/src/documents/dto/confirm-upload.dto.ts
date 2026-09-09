@@ -12,4 +12,8 @@ export class ConfirmUploadDto {
   @IsOptional()
   @IsString()
   stageId?: string;
+
+  @IsOptional()
+  @IsString()
+  diaryEntryId?: string;
 }

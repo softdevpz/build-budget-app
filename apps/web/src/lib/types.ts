@@ -50,10 +50,22 @@ export interface ProjectDocument {
   id: string;
   projectId: string;
   stageId: string | null;
+  diaryEntryId: string | null;
   type: DocumentType;
   fileUrl: string;
   uploadedAt: string;
   downloadUrl: string;
+}
+
+export interface DiaryEntry {
+  id: string;
+  projectId: string;
+  stageId: string | null;
+  authorId: string;
+  author: { email: string };
+  text: string;
+  createdAt: string;
+  photos: ProjectDocument[];
 }
 
 export type ReportStatus = "pending" | "completed" | "failed";

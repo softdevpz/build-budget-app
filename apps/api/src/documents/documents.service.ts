@@ -32,8 +32,14 @@ export class DocumentsService {
     if (dto.stageId) {
       await this.stagesService.findOwned(userId, projectId, dto.stageId);
     }
+    if (dto.diaryEntryId) {
+      const entry = await this.prisma.diaryEntry.findUnique({ where: { id: dto.diaryEntryId } });
+      if (!entry || entry.projectId !== projectId) {
+        throw new NotFoundException('Diary entry not found');
+      }
+    }
     return this.prisma.document.create({
-      data: { projectId, stageId: dto.stageId, type: dto.type, fileUrl: dto.key },
+      data: { projectId, stageId: dto.stageId, diaryEntryId: dto.diaryEntryId, type: dto.type, fileUrl: dto.key },
     });
   }
 
