@@ -130,17 +130,22 @@ export class AuthService {
       throw new UnauthorizedException('Access denied');
     }
 
-    const refreshTokenMatches = await bcrypt.compare(
-      refreshToken,
-      user.hashedRefreshToken,
-    );
+    const refreshTokenMatches = await bcrypt.compare(refreshToken, user.hashedRefreshToken);
     if (!refreshTokenMatches) {
       throw new UnauthorizedException('Access denied');
     }
 
-    const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRefreshTokenHash(user.id, tokens.refreshToken);
-    return tokens;
+    // Deliberately does NOT rotate the refresh token here (only login/
+    // verifyEmail do, since those start a genuinely new session). Several
+    // requests routinely hit an expired access token at the same moment
+    // (every panel's own query) and each independently calls this — if
+    // refreshing rotated the stored hash, the first one to land would
+    // invalidate the refresh token the others are still holding, logging
+    // the user out mid-session. Reusing the same (still valid) refresh
+    // token instead makes concurrent refreshes idempotent: every racer
+    // succeeds against the same unchanged hash, no ordering dependency.
+    const accessToken = await this.signAccessToken(user.id, user.email);
+    return { accessToken, refreshToken };
   }
 
   private generateVerificationToken() {
@@ -185,15 +190,19 @@ export class AuthService {
     });
   }
 
+  private signAccessToken(userId: string, email: string) {
+    return this.jwtService.signAsync(
+      { sub: userId, email },
+      {
+        secret: process.env.JWT_SECRET,
+        expiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
+      },
+    );
+  }
+
   private async getTokens(userId: string, email: string) {
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(
-        { sub: userId, email },
-        {
-          secret: process.env.JWT_SECRET,
-          expiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
-        },
-      ),
+      this.signAccessToken(userId, email),
       this.jwtService.signAsync(
         { sub: userId, email },
         {

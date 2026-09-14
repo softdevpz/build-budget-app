@@ -203,5 +203,18 @@ describe('AuthService', () => {
 
       await expect(service.refreshTokens('user-1', 'a-different-token')).rejects.toThrow(UnauthorizedException);
     });
+
+    it('reuses the same refresh token instead of rotating it, so concurrent refreshes stay idempotent', async () => {
+      const hashedRefreshToken = await bcrypt.hash('the-real-refresh-token', 10);
+      prisma.user.findUnique.mockResolvedValue({ id: 'user-1', email: 'a@example.com', hashedRefreshToken });
+
+      const result = await service.refreshTokens('user-1', 'the-real-refresh-token');
+
+      expect(result).toEqual({ accessToken: 'signed-token', refreshToken: 'the-real-refresh-token' });
+      // Two independent requests racing on the same expired access token
+      // must not invalidate each other's refresh token — asserted here by
+      // checking neither call writes hashedRefreshToken at all.
+      expect(prisma.user.update).not.toHaveBeenCalled();
+    });
   });
 });
