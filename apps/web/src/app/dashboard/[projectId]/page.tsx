@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { arrayOrEmpty, callNestApi, summaryOrDefault } from "@/lib/api-server";
 import { getAccessToken } from "@/lib/cookies";
-import type { DiaryEntry, Expense, Project, ProjectDocument, ProjectMember, Report, Stage } from "@/lib/types";
+import type { DiaryEntry, Expense, Project, ProjectDocument, ProjectMember, Report, Stage, Task } from "@/lib/types";
 import { ProjectWorkspace } from "./project-workspace";
 
 type PageParams = { params: Promise<{ projectId: string }> };
@@ -13,7 +13,7 @@ export default async function ProjectPage({ params }: PageParams) {
     redirect("/login");
   }
 
-  const [projectRes, summaryRes, stagesRes, expensesRes, documentsRes, reportsRes, diaryRes, membersRes] =
+  const [projectRes, summaryRes, stagesRes, expensesRes, documentsRes, reportsRes, diaryRes, membersRes, tasksRes] =
     await Promise.all([
       callNestApi(`/projects/${projectId}`, { token }),
       callNestApi(`/projects/${projectId}/summary`, { token }),
@@ -23,6 +23,7 @@ export default async function ProjectPage({ params }: PageParams) {
       callNestApi(`/projects/${projectId}/reports`, { token }),
       callNestApi(`/projects/${projectId}/diary`, { token }),
       callNestApi(`/projects/${projectId}/members`, { token }),
+      callNestApi(`/projects/${projectId}/tasks`, { token }),
     ]);
 
   if (projectRes.status === 404) {
@@ -43,6 +44,7 @@ export default async function ProjectPage({ params }: PageParams) {
       initialReports={arrayOrEmpty<Report>(reportsRes)}
       initialDiaryEntries={arrayOrEmpty<DiaryEntry>(diaryRes)}
       initialMembers={arrayOrEmpty<ProjectMember>(membersRes)}
+      initialTasks={arrayOrEmpty<Task>(tasksRes)}
     />
   );
 }

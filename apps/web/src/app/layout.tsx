@@ -20,6 +20,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             Budżet budowy
           </Link>
           <nav className="flex items-center gap-4">
+            <Link href="/benchmark" className="text-sm underline">
+              Benchmark
+            </Link>
             {isLoggedIn ? (
               <>
                 <Link href="/dashboard" className="text-sm underline">

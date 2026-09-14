@@ -14,6 +14,7 @@ import type {
   ProjectSummary,
   Report,
   Stage,
+  Task,
 } from "@/lib/types";
 import { BudgetChart } from "./budget-chart";
 import { StagePanel } from "./stage-panel";
@@ -22,6 +23,7 @@ import { DocumentPanel } from "./document-panel";
 import { ReportPanel } from "./report-panel";
 import { DiaryPanel } from "./diary-panel";
 import { MembersPanel } from "./members-panel";
+import { TaskPanel } from "./task-panel";
 
 export function ProjectWorkspace({
   projectId,
@@ -33,6 +35,7 @@ export function ProjectWorkspace({
   initialReports,
   initialDiaryEntries,
   initialMembers,
+  initialTasks,
 }: {
   projectId: string;
   initialProject: Project;
@@ -43,6 +46,7 @@ export function ProjectWorkspace({
   initialReports: Report[];
   initialDiaryEntries: DiaryEntry[];
   initialMembers: ProjectMember[];
+  initialTasks: Task[];
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -179,7 +183,7 @@ export function ProjectWorkspace({
       </div>
 
       <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
-        Bez etapu — kliknij etap powyżej, żeby zobaczyć jego wydatki, dokumenty i dziennik
+        Bez etapu — kliknij etap powyżej, żeby zobaczyć jego wydatki, dokumenty, dziennik i zadania
       </p>
 
       <div className="mb-8">
@@ -192,6 +196,10 @@ export function ProjectWorkspace({
 
       <div className="mb-8">
         <DiaryPanel projectId={projectId} initialEntries={initialDiaryEntries} stages={stages} />
+      </div>
+
+      <div className="mb-8">
+        <TaskPanel projectId={projectId} initialTasks={initialTasks} stages={stages} />
       </div>
 
       <ReportPanel projectId={projectId} initialReports={initialReports} />
