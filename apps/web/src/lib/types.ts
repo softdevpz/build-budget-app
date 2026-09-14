@@ -12,6 +12,12 @@ export interface Project {
 
 export type StageStatus = "pending" | "in_progress" | "done";
 
+export const STAGE_STATUS_LABELS: Record<StageStatus, string> = {
+  pending: "Zaplanowany",
+  in_progress: "W trakcie",
+  done: "Zakończony",
+};
+
 export interface Stage {
   id: string;
   projectId: string;

@@ -155,6 +155,10 @@ export function ProjectWorkspace({
         <StagePanel projectId={projectId} initialStages={stages} summary={summary} />
       </div>
 
+      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
+        Bez etapu — kliknij etap powyżej, żeby zobaczyć jego wydatki, dokumenty i dziennik
+      </p>
+
       <div className="mb-8">
         <ExpensePanel projectId={projectId} initialExpenses={initialExpenses} stages={stages} />
       </div>

@@ -1,3 +1,5 @@
+import type { ProjectSummary } from "./types";
+
 // Called only from Route Handlers and Server Components — never shipped to
 // the browser. This is why the Nest API URL doesn't need a NEXT_PUBLIC_
 // prefix: the browser only ever talks to our own Next.js origin (see
@@ -51,4 +53,17 @@ export async function callNestApiOrThrow(path: string, options: CallOptions = {}
     throw new ApiError(status, Array.isArray(message) ? message.join(", ") : message);
   }
   return data;
+}
+
+// A sub-resource fetch failing (a stale deploy missing a route, a transient
+// 500) shouldn't crash a Server Component — degrade to an empty/default
+// value instead of blindly trusting the response shape with `as`.
+export function arrayOrEmpty<T>(res: ApiResult): T[] {
+  return res.status === 200 ? (res.data as T[]) : [];
+}
+
+const EMPTY_SUMMARY: ProjectSummary = { targetBudget: null, totalSpent: 0, remaining: null, stages: [], unassignedSpent: 0 };
+
+export function summaryOrDefault(res: ApiResult): ProjectSummary {
+  return res.status === 200 ? (res.data as ProjectSummary) : EMPTY_SUMMARY;
 }

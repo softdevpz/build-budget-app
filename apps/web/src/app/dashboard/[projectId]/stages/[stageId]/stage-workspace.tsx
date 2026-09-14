@@ -1,0 +1,134 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiFetch, ClientApiError } from "@/lib/api-client";
+import { getStageBudgetWarning } from "@/lib/budget-warning";
+import {
+  STAGE_STATUS_LABELS,
+  type DiaryEntry,
+  type Expense,
+  type Project,
+  type ProjectDocument,
+  type ProjectSummary,
+  type Stage,
+  type StageStatus,
+} from "@/lib/types";
+import { ExpensePanel } from "../../expense-panel";
+import { DocumentPanel } from "../../document-panel";
+import { DiaryPanel } from "../../diary-panel";
+
+export function StageWorkspace({
+  projectId,
+  project,
+  initialStage,
+  summary: initialSummary,
+  stages: initialStages,
+  initialExpenses,
+  initialDocuments,
+  initialDiaryEntries,
+}: {
+  projectId: string;
+  project: Project;
+  initialStage: Stage;
+  summary: ProjectSummary;
+  stages: Stage[];
+  initialExpenses: Expense[];
+  initialDocuments: ProjectDocument[];
+  initialDiaryEntries: DiaryEntry[];
+}) {
+  const queryClient = useQueryClient();
+
+  // Same query keys the project workspace/StagePanel use — mutations made in
+  // any of the tiles below (adding an expense, etc.) invalidate ["summary",
+  // projectId], which this page picks up automatically via the shared cache.
+  const { data: stages = initialStages } = useQuery({
+    queryKey: ["stages", projectId],
+    queryFn: () => apiFetch<Stage[]>(`/projects/${projectId}/stages`),
+    initialData: initialStages,
+  });
+  const stage = stages.find((s) => s.id === initialStage.id) ?? initialStage;
+
+  const { data: summary = initialSummary } = useQuery({
+    queryKey: ["summary", projectId],
+    queryFn: () => apiFetch<ProjectSummary>(`/projects/${projectId}/summary`),
+    initialData: initialSummary,
+  });
+
+  const [statusError, setStatusError] = useState<string | null>(null);
+
+  const updateStatus = useMutation({
+    mutationFn: (status: StageStatus) =>
+      apiFetch<Stage>(`/projects/${projectId}/stages/${stage.id}`, { method: "PATCH", body: { status } }),
+    onSuccess: () => {
+      setStatusError(null);
+      queryClient.invalidateQueries({ queryKey: ["stages", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["summary", projectId] });
+    },
+    onError: (err) => setStatusError(err instanceof ClientApiError ? err.message : "Nie udało się zmienić statusu"),
+  });
+
+  const warning = getStageBudgetWarning(stage, summary);
+
+  return (
+    <main className="mx-auto max-w-5xl px-4 py-12">
+      <Link href={`/dashboard/${projectId}`} className="text-sm underline">
+        ← {project.name}
+      </Link>
+
+      <div className="mb-2 mt-4 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">{stage.name}</h1>
+          {stage.plannedBudget && (
+            <p className="text-sm text-gray-500">
+              Planowane: {Number(stage.plannedBudget).toLocaleString("pl-PL")} PLN
+            </p>
+          )}
+          {warning && (
+            <p className={`text-sm ${warning.isOver ? "text-red-600" : "text-amber-600"}`}>{warning.message}</p>
+          )}
+        </div>
+        <select
+          value={stage.status}
+          onChange={(e) => updateStatus.mutate(e.target.value as StageStatus)}
+          className="rounded border border-gray-300 px-2 py-1 text-sm"
+        >
+          {Object.entries(STAGE_STATUS_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
+      {statusError && <p className="mb-4 text-sm text-red-600">{statusError}</p>}
+
+      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="rounded border border-gray-200 p-4">
+          <ExpensePanel
+            projectId={projectId}
+            initialExpenses={initialExpenses}
+            stages={stages}
+            stageFilter={stage.id}
+          />
+        </div>
+        <div className="rounded border border-gray-200 p-4">
+          <DocumentPanel
+            projectId={projectId}
+            initialDocuments={initialDocuments}
+            stages={stages}
+            stageFilter={stage.id}
+          />
+        </div>
+        <div className="rounded border border-gray-200 p-4">
+          <DiaryPanel
+            projectId={projectId}
+            initialEntries={initialDiaryEntries}
+            stages={stages}
+            stageFilter={stage.id}
+          />
+        </div>
+      </div>
+    </main>
+  );
+}

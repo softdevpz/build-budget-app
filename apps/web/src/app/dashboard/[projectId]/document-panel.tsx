@@ -15,23 +15,29 @@ export function DocumentPanel({
   projectId,
   initialDocuments,
   stages,
+  stageFilter,
 }: {
   projectId: string;
   initialDocuments: ProjectDocument[];
   stages: Stage[];
+  /** Show only this stage's documents; omit to show only unassigned ("Bez etapu") ones. */
+  stageFilter?: string;
 }) {
   const queryClient = useQueryClient();
   const queryKey = ["documents", projectId];
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: documents = [] } = useQuery({
+  const { data: allDocuments = [] } = useQuery({
     queryKey,
     queryFn: () => apiFetch<ProjectDocument[]>(`/projects/${projectId}/documents`),
     initialData: initialDocuments,
   });
+  const documents = allDocuments.filter((document) =>
+    stageFilter !== undefined ? document.stageId === stageFilter : document.stageId === null,
+  );
 
   const [type, setType] = useState<DocumentType>("invoice");
-  const [stageId, setStageId] = useState("");
+  const [stageId, setStageId] = useState(stageFilter ?? "");
   const [error, setError] = useState<string | null>(null);
 
   function invalidate() {
@@ -66,7 +72,7 @@ export function DocumentPanel({
     onSuccess: () => {
       setError(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
-      setStageId("");
+      setStageId(stageFilter ?? "");
       invalidate();
     },
     onError: (err) =>
