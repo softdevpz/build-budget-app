@@ -74,6 +74,22 @@ export interface DiaryEntry {
   photos: ProjectDocument[];
 }
 
+export type ProjectRole = "owner" | "editor";
+
+export const PROJECT_ROLE_LABELS: Record<ProjectRole, string> = {
+  owner: "Właściciel",
+  editor: "Edytor",
+};
+
+export interface ProjectMember {
+  id: string;
+  projectId: string;
+  userId: string;
+  role: ProjectRole;
+  createdAt: string;
+  user: { email: string };
+}
+
 export type ReportStatus = "pending" | "completed" | "failed";
 
 export interface Report {

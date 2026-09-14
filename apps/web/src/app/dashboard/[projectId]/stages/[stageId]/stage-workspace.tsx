@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
 import { getStageBudgetWarning } from "@/lib/budget-warning";
+import { useProjectSocket } from "@/lib/use-project-socket";
 import {
   STAGE_STATUS_LABELS,
   type DiaryEntry,
@@ -39,6 +40,12 @@ export function StageWorkspace({
   initialDiaryEntries: DiaryEntry[];
 }) {
   const queryClient = useQueryClient();
+
+  useProjectSocket(projectId, () => {
+    queryClient.invalidateQueries({ queryKey: ["stages", projectId] });
+    queryClient.invalidateQueries({ queryKey: ["expenses", projectId] });
+    queryClient.invalidateQueries({ queryKey: ["summary", projectId] });
+  });
 
   // Same query keys the project workspace/StagePanel use — mutations made in
   // any of the tiles below (adding an expense, etc.) invalidate ["summary",

@@ -114,5 +114,3 @@ docker-compose.yml -> Postgres + Redis + Mailpit (dev SMTP catcher, UI at http:/
 - [ ] Billing UI
 - [ ] Benchmark & tasks UI
 - [ ] Bilingual UI (PL/EN)
-
-Test

@@ -4,13 +4,24 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
-import type { DiaryEntry, Expense, Project, ProjectDocument, ProjectSummary, Report, Stage } from "@/lib/types";
+import { useProjectSocket } from "@/lib/use-project-socket";
+import type {
+  DiaryEntry,
+  Expense,
+  Project,
+  ProjectDocument,
+  ProjectMember,
+  ProjectSummary,
+  Report,
+  Stage,
+} from "@/lib/types";
 import { BudgetChart } from "./budget-chart";
 import { StagePanel } from "./stage-panel";
 import { ExpensePanel } from "./expense-panel";
 import { DocumentPanel } from "./document-panel";
 import { ReportPanel } from "./report-panel";
 import { DiaryPanel } from "./diary-panel";
+import { MembersPanel } from "./members-panel";
 
 export function ProjectWorkspace({
   projectId,
@@ -21,6 +32,7 @@ export function ProjectWorkspace({
   initialDocuments,
   initialReports,
   initialDiaryEntries,
+  initialMembers,
 }: {
   projectId: string;
   initialProject: Project;
@@ -30,9 +42,16 @@ export function ProjectWorkspace({
   initialDocuments: ProjectDocument[];
   initialReports: Report[];
   initialDiaryEntries: DiaryEntry[];
+  initialMembers: ProjectMember[];
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  useProjectSocket(projectId, () => {
+    queryClient.invalidateQueries({ queryKey: ["stages", projectId] });
+    queryClient.invalidateQueries({ queryKey: ["expenses", projectId] });
+    queryClient.invalidateQueries({ queryKey: ["summary", projectId] });
+  });
 
   const { data: project = initialProject } = useQuery({
     queryKey: ["project", projectId],
@@ -140,6 +159,10 @@ export function ProjectWorkspace({
         )}
       </div>
       {actionError && <p className="mb-4 text-sm text-red-600">{actionError}</p>}
+
+      <div className="mb-8">
+        <MembersPanel projectId={projectId} initialMembers={initialMembers} />
+      </div>
 
       <div className="mb-8 grid grid-cols-3 gap-4">
         <SummaryCard label="Budżet docelowy" value={summary.targetBudget} />
