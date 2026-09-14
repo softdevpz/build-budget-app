@@ -12,12 +12,6 @@ export interface Project {
 
 export type StageStatus = "pending" | "in_progress" | "done";
 
-export const STAGE_STATUS_LABELS: Record<StageStatus, string> = {
-  pending: "Zaplanowany",
-  in_progress: "W trakcie",
-  done: "Zakończony",
-};
-
 export interface Stage {
   id: string;
   projectId: string;
@@ -76,11 +70,6 @@ export interface DiaryEntry {
 
 export type ProjectRole = "owner" | "editor";
 
-export const PROJECT_ROLE_LABELS: Record<ProjectRole, string> = {
-  owner: "Właściciel",
-  editor: "Edytor",
-};
-
 export interface ProjectMember {
   id: string;
   projectId: string;
@@ -98,13 +87,6 @@ export interface ProjectMember {
 // narrow against honestly; SUBSCRIPTION_STATUS_LABELS's `?? status` fallback
 // already covers any Stripe status we haven't added a label for.
 export type SubscriptionStatus = string;
-
-export const SUBSCRIPTION_STATUS_LABELS: Record<string, string> = {
-  active: "Aktywna",
-  trialing: "Okres próbny",
-  past_due: "Zaległa płatność",
-  canceled: "Anulowana",
-};
 
 export interface BillingStatus {
   plan: "free" | "premium";

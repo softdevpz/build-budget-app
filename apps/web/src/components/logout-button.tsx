@@ -2,8 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export function LogoutButton() {
+  const t = useTranslations("nav");
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -16,7 +18,7 @@ export function LogoutButton() {
 
   return (
     <button onClick={handleLogout} disabled={isLoggingOut} className="text-sm underline disabled:opacity-50">
-      Wyloguj się
+      {t("logout")}
     </button>
   );
 }

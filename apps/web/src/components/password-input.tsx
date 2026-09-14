@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, InputHTMLAttributes } from "react";
+import { useTranslations } from "next-intl";
 
 export function PasswordInput(props: InputHTMLAttributes<HTMLInputElement>) {
+  const t = useTranslations("passwordInput");
   const [visible, setVisible] = useState(false);
 
   return (
@@ -13,7 +15,7 @@ export function PasswordInput(props: InputHTMLAttributes<HTMLInputElement>) {
         onClick={() => setVisible((v) => !v)}
         className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-600 underline"
       >
-        {visible ? "Ukryj" : "Pokaż"}
+        {visible ? t("hide") : t("show")}
       </button>
     </div>
   );

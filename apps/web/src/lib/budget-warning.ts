@@ -9,7 +9,17 @@ export interface StageBudgetWarning {
   isOver: boolean;
 }
 
-export function getStageBudgetWarning(stage: Stage, summary: ProjectSummary): StageBudgetWarning | null {
+// Takes the caller's own useTranslations("stages") result rather than
+// calling the hook itself — this is a plain utility function, not a
+// component/hook, so it can't call hooks on its own without breaking the
+// rules of hooks.
+type Translator = (key: string, values?: Record<string, string | number>) => string;
+
+export function getStageBudgetWarning(
+  stage: Stage,
+  summary: ProjectSummary,
+  t: Translator,
+): StageBudgetWarning | null {
   if (!stage.plannedBudget) return null;
   const spent = summary.stages.find((s) => s.id === stage.id)?.spent ?? 0;
   const planned = Number(stage.plannedBudget);
@@ -18,9 +28,6 @@ export function getStageBudgetWarning(stage: Stage, summary: ProjectSummary): St
   const pct = Math.round(ratio * 100);
   return {
     isOver: ratio >= 1,
-    message:
-      ratio >= 1
-        ? `Przekroczono budżet etapu — wykorzystano ${pct}%`
-        : `${pct}% budżetu etapu wykorzystane, zbliżasz się do limitu`,
+    message: ratio >= 1 ? t("warningOver", { pct }) : t("warningApproaching", { pct }),
   };
 }

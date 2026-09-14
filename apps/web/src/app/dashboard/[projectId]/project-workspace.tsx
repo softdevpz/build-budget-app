@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
 import { useProjectSocket } from "@/lib/use-project-socket";
@@ -48,6 +49,7 @@ export function ProjectWorkspace({
   initialMembers: ProjectMember[];
   initialTasks: Task[];
 }) {
+  const t = useTranslations("project");
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -92,7 +94,7 @@ export function ProjectWorkspace({
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
       queryClient.invalidateQueries({ queryKey: ["summary", projectId] });
     },
-    onError: (err) => setActionError(err instanceof ClientApiError ? err.message : "Nie udało się zapisać zmian"),
+    onError: (err) => setActionError(err instanceof ClientApiError ? err.message : t("genericSaveError")),
   });
 
   const deleteProject = useMutation({
@@ -101,7 +103,7 @@ export function ProjectWorkspace({
       router.push("/dashboard");
       router.refresh();
     },
-    onError: (err) => setActionError(err instanceof ClientApiError ? err.message : "Nie udało się usunąć projektu"),
+    onError: (err) => setActionError(err instanceof ClientApiError ? err.message : t("genericDeleteError")),
   });
 
   return (
@@ -126,7 +128,7 @@ export function ProjectWorkspace({
               step="0.01"
               value={targetBudget}
               onChange={(e) => setTargetBudget(e.target.value)}
-              placeholder="Budżet docelowy"
+              placeholder={t("targetBudgetPlaceholder")}
               className="w-40 rounded border border-gray-300 px-2 py-1 text-sm"
             />
             <button
@@ -134,10 +136,10 @@ export function ProjectWorkspace({
               disabled={updateProject.isPending}
               className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
             >
-              Zapisz
+              {t("save")}
             </button>
             <button type="button" onClick={() => setIsEditing(false)} className="text-sm underline">
-              Anuluj
+              {t("cancel")}
             </button>
           </form>
         ) : (
@@ -149,15 +151,15 @@ export function ProjectWorkspace({
         {!isEditing && (
           <div className="flex gap-3">
             <button onClick={() => setIsEditing(true)} className="text-sm underline">
-              Edytuj
+              {t("edit")}
             </button>
             <button
               onClick={() => {
-                if (confirm(`Usunąć projekt "${project.name}" wraz z całą zawartością?`)) deleteProject.mutate();
+                if (confirm(t("confirmDelete", { name: project.name }))) deleteProject.mutate();
               }}
               className="text-sm text-red-600 underline"
             >
-              Usuń projekt
+              {t("delete")}
             </button>
           </div>
         )}
@@ -169,9 +171,9 @@ export function ProjectWorkspace({
       </div>
 
       <div className="mb-8 grid grid-cols-3 gap-4">
-        <SummaryCard label="Budżet docelowy" value={summary.targetBudget} />
-        <SummaryCard label="Wydano" value={summary.totalSpent} />
-        <SummaryCard label="Pozostało" value={summary.remaining} />
+        <SummaryCard label={t("summaryTargetBudget")} value={summary.targetBudget} />
+        <SummaryCard label={t("summarySpent")} value={summary.totalSpent} />
+        <SummaryCard label={t("summaryRemaining")} value={summary.remaining} />
       </div>
 
       <div className="mb-8">
@@ -182,9 +184,7 @@ export function ProjectWorkspace({
         <StagePanel projectId={projectId} initialStages={stages} summary={summary} />
       </div>
 
-      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
-        Bez etapu — kliknij etap powyżej, żeby zobaczyć jego wydatki, dokumenty, dziennik i zadania
-      </p>
+      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">{t("unassignedHint")}</p>
 
       <div className="mb-8">
         <ExpensePanel projectId={projectId} initialExpenses={initialExpenses} stages={stages} />

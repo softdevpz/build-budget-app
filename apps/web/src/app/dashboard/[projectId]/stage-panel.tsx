@@ -2,10 +2,12 @@
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
 import { getStageBudgetWarning } from "@/lib/budget-warning";
-import { STAGE_STATUS_LABELS, type ProjectSummary, type Stage, type StageStatus } from "@/lib/types";
+import { useStageStatusLabels } from "@/lib/use-stage-status-labels";
+import type { ProjectSummary, Stage, StageStatus } from "@/lib/types";
 
 export function StagePanel({
   projectId,
@@ -16,6 +18,9 @@ export function StagePanel({
   initialStages: Stage[];
   summary: ProjectSummary;
 }) {
+  const t = useTranslations("stages");
+  const tc = useTranslations("common");
+  const statusLabels = useStageStatusLabels();
   const queryClient = useQueryClient();
   const queryKey = ["stages", projectId];
 
@@ -50,7 +55,7 @@ export function StagePanel({
       setError(null);
       invalidate();
     },
-    onError: (err) => setError(err instanceof ClientApiError ? err.message : "Nie udało się dodać etapu"),
+    onError: (err) => setError(err instanceof ClientApiError ? err.message : t("genericAddError")),
   });
 
   const updateStatus = useMutation({
@@ -72,13 +77,13 @@ export function StagePanel({
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">Etapy</h2>
+      <h2 className="mb-3 text-lg font-semibold">{t("title")}</h2>
       {stages.length === 0 ? (
-        <p className="mb-4 text-sm text-gray-500">Brak etapów.</p>
+        <p className="mb-4 text-sm text-gray-500">{t("empty")}</p>
       ) : (
         <ul className="mb-4 flex flex-col gap-2">
           {stages.map((stage) => {
-            const warning = getStageBudgetWarning(stage, summary);
+            const warning = getStageBudgetWarning(stage, summary, t);
             return (
             <li
               key={stage.id}
@@ -90,7 +95,7 @@ export function StagePanel({
                 </Link>
                 {stage.plannedBudget && (
                   <p className="text-xs text-gray-500">
-                    Planowane: {Number(stage.plannedBudget).toLocaleString("pl-PL")} PLN
+                    {t("planned", { amount: Number(stage.plannedBudget).toLocaleString("pl-PL") })}
                   </p>
                 )}
                 {warning && (
@@ -107,7 +112,7 @@ export function StagePanel({
                   }
                   className="rounded border border-gray-300 px-2 py-1 text-xs"
                 >
-                  {Object.entries(STAGE_STATUS_LABELS).map(([value, label]) => (
+                  {Object.entries(statusLabels).map(([value, label]) => (
                     <option key={value} value={value}>
                       {label}
                     </option>
@@ -115,11 +120,11 @@ export function StagePanel({
                 </select>
                 <button
                   onClick={() => {
-                    if (confirm(`Usunąć etap "${stage.name}"?`)) deleteStage.mutate(stage.id);
+                    if (confirm(t("confirmDelete", { name: stage.name }))) deleteStage.mutate(stage.id);
                   }}
                   className="text-xs text-red-600 underline"
                 >
-                  Usuń
+                  {tc("delete")}
                 </button>
               </div>
             </li>
@@ -130,7 +135,7 @@ export function StagePanel({
 
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">Nazwa etapu</span>
+          <span className="text-xs text-gray-700">{t("namePlaceholder")}</span>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -138,7 +143,7 @@ export function StagePanel({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">Planowany budżet (opcjonalnie)</span>
+          <span className="text-xs text-gray-700">{t("plannedBudgetPlaceholder")}</span>
           <input
             type="number"
             min="0"
@@ -153,7 +158,7 @@ export function StagePanel({
           disabled={createStage.isPending}
           className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
         >
-          Dodaj etap
+          {t("add")}
         </button>
       </form>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}

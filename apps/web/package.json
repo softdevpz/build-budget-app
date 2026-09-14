@@ -10,20 +10,21 @@
     "start": "next start"
   },
   "dependencies": {
+    "@build-budget-app/shared": "*",
+    "@tanstack/react-query": "^5.51.0",
     "next": "^16.3.4",
+    "next-intl": "^4.14.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "@tanstack/react-query": "^5.51.0",
     "recharts": "^2.12.7",
-    "socket.io-client": "^4.8.3",
-    "@build-budget-app/shared": "*"
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
-    "typescript": "^5.5.0",
-    "@types/react": "^19.2.0",
     "@types/node": "^20.14.0",
-    "tailwindcss": "^3.4.7",
+    "@types/react": "^19.2.0",
+    "autoprefixer": "^10.4.19",
     "postcss": "^8.4.40",
-    "autoprefixer": "^10.4.19"
+    "tailwindcss": "^3.4.7",
+    "typescript": "^5.5.0"
   }
 }

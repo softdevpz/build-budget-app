@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { callNestApi } from "@/lib/api-server";
 import { getAccessToken } from "@/lib/cookies";
 import type { Project } from "@/lib/types";
@@ -9,6 +10,7 @@ export default async function DashboardPage() {
   if (!token) {
     redirect("/login");
   }
+  const t = await getTranslations("dashboard");
 
   const { status, data } = await callNestApi("/projects", { token });
   const projects = status === 200 ? (data as Project[]) : [];
@@ -16,16 +18,14 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Twoje projekty</h1>
+        <h1 className="text-2xl font-semibold">{t("title")}</h1>
         <Link href="/dashboard/new" className="rounded bg-gray-900 px-4 py-2 text-sm text-white">
-          Nowy projekt
+          {t("newProject")}
         </Link>
       </div>
 
       {projects.length === 0 ? (
-        <p className="text-gray-600">
-          Nie masz jeszcze żadnego projektu. Załóż pierwszy, żeby zacząć śledzić budżet budowy.
-        </p>
+        <p className="text-gray-600">{t("empty")}</p>
       ) : (
         <ul className="flex flex-col gap-3">
           {projects.map((project) => (

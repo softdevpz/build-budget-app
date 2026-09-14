@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { BenchmarkStat } from "@/lib/types";
 
 export function BenchmarkTable({ stats }: { stats: BenchmarkStat[] }) {
+  const t = useTranslations("benchmark");
   const [region, setRegion] = useState("");
   const [stageCategory, setStageCategory] = useState("");
 
@@ -25,7 +27,7 @@ export function BenchmarkTable({ stats }: { stats: BenchmarkStat[] }) {
           onChange={(e) => setRegion(e.target.value)}
           className="rounded border border-gray-300 px-2 py-1 text-sm"
         >
-          <option value="">Wszystkie regiony</option>
+          <option value="">{t("allRegions")}</option>
           {regions.map((r) => (
             <option key={r} value={r}>
               {r}
@@ -37,7 +39,7 @@ export function BenchmarkTable({ stats }: { stats: BenchmarkStat[] }) {
           onChange={(e) => setStageCategory(e.target.value)}
           className="rounded border border-gray-300 px-2 py-1 text-sm"
         >
-          <option value="">Wszystkie etapy</option>
+          <option value="">{t("allStages")}</option>
           {stageCategories.map((c) => (
             <option key={c} value={c}>
               {c}
@@ -47,15 +49,15 @@ export function BenchmarkTable({ stats }: { stats: BenchmarkStat[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-gray-500">Brak danych spełniających te kryteria.</p>
+        <p className="text-sm text-gray-500">{t("noResults")}</p>
       ) : (
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
-              <th className="py-2">Region</th>
-              <th className="py-2">Etap</th>
-              <th className="py-2">Śr. koszt/m²</th>
-              <th className="py-2">Próbki</th>
+              <th className="py-2">{t("region")}</th>
+              <th className="py-2">{t("stage")}</th>
+              <th className="py-2">{t("avgCost")}</th>
+              <th className="py-2">{t("samples")}</th>
             </tr>
           </thead>
           <tbody>
