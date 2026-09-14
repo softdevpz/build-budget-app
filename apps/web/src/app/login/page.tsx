@@ -3,9 +3,11 @@
 import { useState, FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { PasswordInput } from "@/components/password-input";
 
 export default function LoginPage() {
+  const t = useTranslations("login");
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -35,7 +37,7 @@ export default function LoginPage() {
       if (res.status === 403) {
         setNeedsVerification(true);
       } else {
-        setError(data?.message ?? "Nie udało się zalogować");
+        setError(data?.message ?? t("genericError"));
       }
       return;
     }
@@ -56,10 +58,10 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
-      <h1 className="mb-6 text-2xl font-semibold">Zaloguj się</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">E-mail</span>
+          <span className="text-sm text-gray-700">{t("email")}</span>
           <input
             type="email"
             required
@@ -69,7 +71,7 @@ export default function LoginPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">Hasło</span>
+          <span className="text-sm text-gray-700">{t("password")}</span>
           <PasswordInput
             required
             value={password}
@@ -80,9 +82,9 @@ export default function LoginPage() {
         {error && <p className="text-sm text-red-600">{error}</p>}
         {needsVerification && (
           <div className="rounded border border-amber-300 bg-amber-50 p-3 text-sm">
-            <p>Musisz najpierw potwierdzić adres e-mail.</p>
+            <p>{t("needsVerification")}</p>
             {resendStatus === "sent" ? (
-              <p className="mt-1 text-green-700">Wysłaliśmy nowy link, sprawdź skrzynkę.</p>
+              <p className="mt-1 text-green-700">{t("resendSent")}</p>
             ) : (
               <button
                 type="button"
@@ -90,7 +92,7 @@ export default function LoginPage() {
                 disabled={resendStatus === "sending"}
                 className="mt-1 underline disabled:opacity-50"
               >
-                {resendStatus === "sending" ? "Wysyłanie..." : "Wyślij link ponownie"}
+                {resendStatus === "sending" ? t("resending") : t("resend")}
               </button>
             )}
           </div>
@@ -100,13 +102,13 @@ export default function LoginPage() {
           disabled={isSubmitting}
           className="rounded bg-gray-900 px-4 py-2 text-white disabled:opacity-50"
         >
-          {isSubmitting ? "Logowanie..." : "Zaloguj się"}
+          {isSubmitting ? t("submitting") : t("submit")}
         </button>
       </form>
       <p className="mt-4 text-sm text-gray-600">
-        Nie masz konta?{" "}
+        {t("noAccount")}{" "}
         <Link href="/register" className="underline">
-          Zarejestruj się
+          {t("registerLink")}
         </Link>
       </p>
     </main>

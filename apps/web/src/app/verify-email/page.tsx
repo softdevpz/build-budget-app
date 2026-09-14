@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 type Status = "verifying" | "success" | "error";
 
 export default function VerifyEmailPage() {
+  const t = useTranslations("verifyEmail");
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -38,17 +40,19 @@ export default function VerifyEmailPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4 text-center">
-      {status === "verifying" && <p>Potwierdzanie adresu e-mail...</p>}
-      {status === "success" && <p>Konto potwierdzone! Przenoszę do pulpitu...</p>}
+      {status === "verifying" && <p>{t("verifying")}</p>}
+      {status === "success" && <p>{t("success")}</p>}
       {status === "error" && (
         <>
-          <h1 className="mb-4 text-xl font-semibold">Link jest nieprawidłowy lub wygasł</h1>
+          <h1 className="mb-4 text-xl font-semibold">{t("errorTitle")}</h1>
           <p className="text-gray-600">
-            Wróć do{" "}
-            <Link href="/login" className="underline">
-              logowania
-            </Link>{" "}
-            i poproś o nowy link.
+            {t.rich("errorBody", {
+              login: (chunks) => (
+                <Link href="/login" className="underline">
+                  {chunks}
+                </Link>
+              ),
+            })}
           </p>
         </>
       )}

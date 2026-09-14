@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
 import type { Expense, Stage } from "@/lib/types";
@@ -17,6 +18,8 @@ export function ExpensePanel({
   /** Show only this stage's expenses; omit to show only unassigned ("Bez etapu") ones. */
   stageFilter?: string;
 }) {
+  const t = useTranslations("expenses");
+  const tc = useTranslations("common");
   const queryClient = useQueryClient();
   const queryKey = ["expenses", projectId];
 
@@ -61,7 +64,7 @@ export function ExpensePanel({
       setError(null);
       invalidate();
     },
-    onError: (err) => setError(err instanceof ClientApiError ? err.message : "Nie udało się dodać wydatku"),
+    onError: (err) => setError(err instanceof ClientApiError ? err.message : t("genericAddError")),
   });
 
   const deleteExpense = useMutation({
@@ -77,15 +80,15 @@ export function ExpensePanel({
   }
 
   function stageName(id: string | null) {
-    if (!id) return "Bez etapu";
-    return stages.find((s) => s.id === id)?.name ?? "Bez etapu";
+    if (!id) return t("noStage");
+    return stages.find((s) => s.id === id)?.name ?? t("noStage");
   }
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">Wydatki</h2>
+      <h2 className="mb-3 text-lg font-semibold">{t("title")}</h2>
       {expenses.length === 0 ? (
-        <p className="mb-4 text-sm text-gray-500">Brak wydatków.</p>
+        <p className="mb-4 text-sm text-gray-500">{t("empty")}</p>
       ) : (
         <ul className="mb-4 flex flex-col gap-2">
           {expenses.map((expense) => (
@@ -104,11 +107,11 @@ export function ExpensePanel({
               </div>
               <button
                 onClick={() => {
-                  if (confirm(`Usunąć wydatek "${expense.category}"?`)) deleteExpense.mutate(expense.id);
+                  if (confirm(t("confirmDelete", { category: expense.category }))) deleteExpense.mutate(expense.id);
                 }}
                 className="text-xs text-red-600 underline"
               >
-                Usuń
+                {tc("delete")}
               </button>
             </li>
           ))}
@@ -117,7 +120,7 @@ export function ExpensePanel({
 
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">Kategoria</span>
+          <span className="text-xs text-gray-700">{t("category")}</span>
           <input
             value={category}
             onChange={(e) => setCategory(e.target.value)}
@@ -125,7 +128,7 @@ export function ExpensePanel({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">Kwota</span>
+          <span className="text-xs text-gray-700">{t("amount")}</span>
           <input
             type="number"
             min="0"
@@ -136,7 +139,7 @@ export function ExpensePanel({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">Data</span>
+          <span className="text-xs text-gray-700">{t("date")}</span>
           <input
             type="date"
             value={date}
@@ -145,7 +148,7 @@ export function ExpensePanel({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">Dostawca</span>
+          <span className="text-xs text-gray-700">{t("vendor")}</span>
           <input
             value={vendor}
             onChange={(e) => setVendor(e.target.value)}
@@ -153,13 +156,13 @@ export function ExpensePanel({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">Etap</span>
+          <span className="text-xs text-gray-700">{t("stage")}</span>
           <select
             value={stageId}
             onChange={(e) => setStageId(e.target.value)}
             className="rounded border border-gray-300 px-2 py-1 text-sm"
           >
-            <option value="">Bez etapu</option>
+            <option value="">{t("noStage")}</option>
             {stages.map((stage) => (
               <option key={stage.id} value={stage.id}>
                 {stage.name}
@@ -172,7 +175,7 @@ export function ExpensePanel({
           disabled={createExpense.isPending}
           className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
         >
-          Dodaj wydatek
+          {t("add")}
         </button>
       </form>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}

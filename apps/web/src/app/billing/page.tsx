@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { callNestApi } from "@/lib/api-server";
 import { getAccessToken } from "@/lib/cookies";
-import { SUBSCRIPTION_STATUS_LABELS, type BillingStatus } from "@/lib/types";
+import type { BillingStatus } from "@/lib/types";
 import { UpgradeButton } from "./upgrade-button";
 
 export default async function BillingPage() {
@@ -9,35 +10,42 @@ export default async function BillingPage() {
   if (!token) {
     redirect("/login");
   }
+  const t = await getTranslations("billing");
 
   const { status, data } = await callNestApi("/billing/status", { token });
   const billing: BillingStatus = status === 200 ? (data as BillingStatus) : { plan: "free", subscription: null };
 
+  const statusLabels: Record<string, string> = {
+    active: t("statusActive"),
+    trialing: t("statusTrialing"),
+    past_due: t("statusPastDue"),
+    canceled: t("statusCanceled"),
+  };
+
   return (
     <main className="mx-auto max-w-sm px-4 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">Plan i płatności</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
 
       <div className="mb-6 rounded border border-gray-200 px-4 py-3">
-        <p className="text-xs text-gray-500">Aktualny plan</p>
-        <p className="text-lg font-semibold">{billing.plan === "premium" ? "Premium" : "Darmowy"}</p>
+        <p className="text-xs text-gray-500">{t("currentPlan")}</p>
+        <p className="text-lg font-semibold">{billing.plan === "premium" ? t("planPremium") : t("planFree")}</p>
         {billing.subscription && (
           <p className="mt-1 text-xs text-gray-500">
-            Status: {SUBSCRIPTION_STATUS_LABELS[billing.subscription.status] ?? billing.subscription.status} ·
-            odnowienie{" "}
-            {new Date(billing.subscription.currentPeriodEnd).toLocaleDateString("pl-PL")}
+            {t("statusLine", {
+              status: statusLabels[billing.subscription.status] ?? billing.subscription.status,
+              date: new Date(billing.subscription.currentPeriodEnd).toLocaleDateString("pl-PL"),
+            })}
           </p>
         )}
       </div>
 
       {billing.plan === "free" ? (
         <>
-          <p className="mb-4 text-sm text-gray-600">
-            Plan darmowy pozwala na 1 projekt. Ulepsz do Premium, żeby zarządzać nieograniczoną liczbą projektów.
-          </p>
+          <p className="mb-4 text-sm text-gray-600">{t("freeDescription")}</p>
           <UpgradeButton />
         </>
       ) : (
-        <p className="text-sm text-gray-600">Masz nieograniczoną liczbę projektów. Dziękujemy za wsparcie!</p>
+        <p className="text-sm text-gray-600">{t("premiumThanks")}</p>
       )}
     </main>
   );

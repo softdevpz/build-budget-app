@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
 import type { Stage, Task } from "@/lib/types";
@@ -17,6 +18,8 @@ export function TaskPanel({
   /** Show only this stage's tasks; omit to show only unassigned ("Bez etapu") ones. */
   stageFilter?: string;
 }) {
+  const t = useTranslations("tasks");
+  const tc = useTranslations("common");
   const queryClient = useQueryClient();
   const queryKey = ["tasks", projectId];
 
@@ -55,7 +58,7 @@ export function TaskPanel({
       setError(null);
       invalidate();
     },
-    onError: (err) => setError(err instanceof ClientApiError ? err.message : "Nie udało się dodać zadania"),
+    onError: (err) => setError(err instanceof ClientApiError ? err.message : t("genericAddError")),
   });
 
   const toggleDone = useMutation({
@@ -81,9 +84,9 @@ export function TaskPanel({
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">Zadania</h2>
+      <h2 className="mb-3 text-lg font-semibold">{t("title")}</h2>
       {tasks.length === 0 ? (
-        <p className="mb-4 text-sm text-gray-500">Brak zadań.</p>
+        <p className="mb-4 text-sm text-gray-500">{t("empty")}</p>
       ) : (
         <ul className="mb-4 flex flex-col gap-2">
           {tasks.map((task) => (
@@ -101,19 +104,19 @@ export function TaskPanel({
                   <p className={task.done ? "line-through text-gray-400" : "font-medium"}>{task.title}</p>
                   {task.dueDate && (
                     <p className={`text-xs ${isOverdue(task) ? "text-red-600" : "text-gray-500"}`}>
-                      Termin: {new Date(task.dueDate).toLocaleDateString("pl-PL")}
-                      {isOverdue(task) ? " — po terminie" : ""}
+                      {t("dueDateLabel", { date: new Date(task.dueDate).toLocaleDateString("pl-PL") })}
+                      {isOverdue(task) ? t("overdueSuffix") : ""}
                     </p>
                   )}
                 </span>
               </label>
               <button
                 onClick={() => {
-                  if (confirm(`Usunąć zadanie "${task.title}"?`)) deleteTask.mutate(task.id);
+                  if (confirm(t("confirmDelete", { title: task.title }))) deleteTask.mutate(task.id);
                 }}
                 className="text-xs text-red-600 underline"
               >
-                Usuń
+                {tc("delete")}
               </button>
             </li>
           ))}
@@ -122,7 +125,7 @@ export function TaskPanel({
 
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">Nazwa zadania</span>
+          <span className="text-xs text-gray-700">{t("nameLabel")}</span>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -130,7 +133,7 @@ export function TaskPanel({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">Termin (opcjonalnie)</span>
+          <span className="text-xs text-gray-700">{t("dueDate")}</span>
           <input
             type="date"
             value={dueDate}
@@ -139,13 +142,13 @@ export function TaskPanel({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">Etap</span>
+          <span className="text-xs text-gray-700">{t("stage")}</span>
           <select
             value={stageId}
             onChange={(e) => setStageId(e.target.value)}
             className="rounded border border-gray-300 px-2 py-1 text-sm"
           >
-            <option value="">Bez etapu</option>
+            <option value="">{t("noStage")}</option>
             {stages.map((stage) => (
               <option key={stage.id} value={stage.id}>
                 {stage.name}
@@ -158,7 +161,7 @@ export function TaskPanel({
           disabled={createTask.isPending}
           className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
         >
-          Dodaj zadanie
+          {t("add")}
         </button>
       </form>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}

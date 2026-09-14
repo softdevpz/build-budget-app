@@ -3,10 +3,12 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
 import type { Project } from "@/lib/types";
 
 export default function NewProjectPage() {
+  const t = useTranslations("newProject");
   const router = useRouter();
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
@@ -42,7 +44,7 @@ export default function NewProjectPage() {
       if (err instanceof ClientApiError && err.status === 402) {
         setPlanLimitReached(true);
       } else {
-        setError(err instanceof ClientApiError ? err.message : "Nie udało się utworzyć projektu");
+        setError(err instanceof ClientApiError ? err.message : t("genericError"));
       }
     } finally {
       setIsSubmitting(false);
@@ -51,10 +53,10 @@ export default function NewProjectPage() {
 
   return (
     <main className="mx-auto max-w-sm px-4 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">Nowy projekt</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">Nazwa</span>
+          <span className="text-sm text-gray-700">{t("name")}</span>
           <input
             required
             value={name}
@@ -63,7 +65,7 @@ export default function NewProjectPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">Adres</span>
+          <span className="text-sm text-gray-700">{t("address")}</span>
           <input
             value={address}
             onChange={(e) => setAddress(e.target.value)}
@@ -71,7 +73,7 @@ export default function NewProjectPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">Region</span>
+          <span className="text-sm text-gray-700">{t("region")}</span>
           <input
             value={region}
             onChange={(e) => setRegion(e.target.value)}
@@ -79,7 +81,7 @@ export default function NewProjectPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">Powierzchnia (m²)</span>
+          <span className="text-sm text-gray-700">{t("area")}</span>
           <input
             type="number"
             min="0"
@@ -90,7 +92,7 @@ export default function NewProjectPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">Data rozpoczęcia</span>
+          <span className="text-sm text-gray-700">{t("startDate")}</span>
           <input
             type="date"
             value={startDate}
@@ -99,7 +101,7 @@ export default function NewProjectPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">Budżet docelowy (opcjonalnie, możesz dodać później)</span>
+          <span className="text-sm text-gray-700">{t("targetBudget")}</span>
           <input
             type="number"
             min="0"
@@ -112,11 +114,13 @@ export default function NewProjectPage() {
         {error && <p className="text-sm text-red-600">{error}</p>}
         {planLimitReached && (
           <p className="text-sm text-red-600">
-            Twój darmowy plan pozwala tylko na 1 projekt.{" "}
-            <Link href="/billing" className="underline">
-              Ulepsz do Premium
-            </Link>
-            , żeby dodać kolejny.
+            {t.rich("planLimitReached", {
+              upgrade: (chunks) => (
+                <Link href="/billing" className="underline">
+                  {chunks}
+                </Link>
+              ),
+            })}
           </p>
         )}
         <button
@@ -124,7 +128,7 @@ export default function NewProjectPage() {
           disabled={isSubmitting}
           className="rounded bg-gray-900 px-4 py-2 text-white disabled:opacity-50"
         >
-          {isSubmitting ? "Tworzenie..." : "Utwórz projekt"}
+          {isSubmitting ? t("submitting") : t("submit")}
         </button>
       </form>
     </main>

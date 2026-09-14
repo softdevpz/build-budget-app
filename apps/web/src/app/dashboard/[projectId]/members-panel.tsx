@@ -1,11 +1,18 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
-import { PROJECT_ROLE_LABELS, type ProjectMember } from "@/lib/types";
+import type { ProjectMember } from "@/lib/types";
 
 export function MembersPanel({ projectId, initialMembers }: { projectId: string; initialMembers: ProjectMember[] }) {
+  const t = useTranslations("members");
+  const tc = useTranslations("common");
+  const roleLabels: Record<ProjectMember["role"], string> = {
+    owner: t("roleOwner"),
+    editor: t("roleEditor"),
+  };
   const queryClient = useQueryClient();
   const queryKey = ["members", projectId];
 
@@ -30,7 +37,7 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
       setError(null);
       invalidate();
     },
-    onError: (err) => setError(err instanceof ClientApiError ? err.message : "Nie udało się zaprosić użytkownika"),
+    onError: (err) => setError(err instanceof ClientApiError ? err.message : t("genericInviteError")),
   });
 
   const removeMember = useMutation({
@@ -40,7 +47,7 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
       setError(null);
       invalidate();
     },
-    onError: (err) => setError(err instanceof ClientApiError ? err.message : "Nie udało się usunąć członka"),
+    onError: (err) => setError(err instanceof ClientApiError ? err.message : t("genericRemoveError")),
   });
 
   function handleSubmit(e: FormEvent) {
@@ -51,7 +58,7 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">Współpracownicy</h2>
+      <h2 className="mb-3 text-lg font-semibold">{t("title")}</h2>
       <ul className="mb-4 flex flex-col gap-2">
         {members.map((member) => (
           <li
@@ -60,16 +67,16 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
           >
             <div>
               <p className="font-medium">{member.user.email}</p>
-              <p className="text-xs text-gray-500">{PROJECT_ROLE_LABELS[member.role] ?? member.role}</p>
+              <p className="text-xs text-gray-500">{roleLabels[member.role]}</p>
             </div>
             {member.role !== "owner" && (
               <button
                 onClick={() => {
-                  if (confirm(`Usunąć ${member.user.email} z projektu?`)) removeMember.mutate(member.id);
+                  if (confirm(t("confirmRemove", { email: member.user.email }))) removeMember.mutate(member.id);
                 }}
                 className="text-xs text-red-600 underline"
               >
-                Usuń
+                {tc("delete")}
               </button>
             )}
           </li>
@@ -78,7 +85,7 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
 
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">E-mail osoby do zaproszenia</span>
+          <span className="text-xs text-gray-700">{t("emailLabel")}</span>
           <input
             type="email"
             value={email}
@@ -91,10 +98,10 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
           disabled={inviteMember.isPending}
           className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
         >
-          Zaproś
+          {t("invite")}
         </button>
       </form>
-      <p className="mt-1 text-xs text-gray-500">Zapraszana osoba musi już mieć konto w aplikacji.</p>
+      <p className="mt-1 text-xs text-gray-500">{t("hint")}</p>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </section>
   );

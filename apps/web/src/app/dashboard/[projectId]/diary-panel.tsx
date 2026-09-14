@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, FormEvent } from "react";
+import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
 import type { DiaryEntry, Stage } from "@/lib/types";
@@ -17,6 +18,8 @@ export function DiaryPanel({
   /** Show only this stage's entries; omit to show only unassigned ("Bez etapu") ones. */
   stageFilter?: string;
 }) {
+  const t = useTranslations("diary");
+  const tc = useTranslations("common");
   const queryClient = useQueryClient();
   const queryKey = ["diary", projectId];
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -59,7 +62,7 @@ export function DiaryPanel({
             headers: { "Content-Type": contentType },
           });
           if (!uploadRes.ok) {
-            throw new Error("Nie udało się wysłać jednego ze zdjęć");
+            throw new Error(t("photoUploadFailed"));
           }
           await apiFetch(`/projects/${projectId}/documents`, {
             method: "POST",
@@ -78,7 +81,7 @@ export function DiaryPanel({
       invalidate();
     },
     onError: (err) =>
-      setError(err instanceof ClientApiError || err instanceof Error ? err.message : "Nie udało się dodać wpisu"),
+      setError(err instanceof ClientApiError || err instanceof Error ? err.message : t("genericAddError")),
   });
 
   const deleteEntry = useMutation({
@@ -99,9 +102,9 @@ export function DiaryPanel({
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">Dziennik budowy</h2>
+      <h2 className="mb-3 text-lg font-semibold">{t("title")}</h2>
       {entries.length === 0 ? (
-        <p className="mb-4 text-sm text-gray-500">Brak wpisów.</p>
+        <p className="mb-4 text-sm text-gray-500">{t("empty")}</p>
       ) : (
         <ul className="mb-4 flex flex-col gap-3">
           {entries.map((entry) => (
@@ -116,11 +119,11 @@ export function DiaryPanel({
                 </div>
                 <button
                   onClick={() => {
-                    if (confirm("Usunąć ten wpis?")) deleteEntry.mutate(entry.id);
+                    if (confirm(t("confirmDelete"))) deleteEntry.mutate(entry.id);
                   }}
                   className="text-xs text-red-600 underline"
                 >
-                  Usuń
+                  {tc("delete")}
                 </button>
               </div>
               {entry.photos.length > 0 && (
@@ -146,19 +149,19 @@ export function DiaryPanel({
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Co się dziś działo na budowie?"
+          placeholder={t("placeholder")}
           rows={2}
           className="rounded border border-gray-300 px-2 py-1 text-sm"
         />
         <div className="flex flex-wrap items-end gap-2">
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-gray-700">Etap</span>
+            <span className="text-xs text-gray-700">{t("stage")}</span>
             <select
               value={stageId}
               onChange={(e) => setStageId(e.target.value)}
               className="rounded border border-gray-300 px-2 py-1 text-sm"
             >
-              <option value="">Bez etapu</option>
+              <option value="">{t("noStage")}</option>
               {stages.map((stage) => (
                 <option key={stage.id} value={stage.id}>
                   {stage.name}
@@ -167,7 +170,7 @@ export function DiaryPanel({
             </select>
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-gray-700">Zdjęcia</span>
+            <span className="text-xs text-gray-700">{t("photos")}</span>
             <input ref={fileInputRef} type="file" accept="image/*" multiple className="text-sm" />
           </label>
           <button
@@ -175,7 +178,7 @@ export function DiaryPanel({
             disabled={createEntry.isPending}
             className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
           >
-            {createEntry.isPending ? "Zapisywanie..." : "Dodaj wpis"}
+            {createEntry.isPending ? t("saving") : t("add")}
           </button>
         </div>
       </form>

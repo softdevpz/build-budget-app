@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
 import { getStageBudgetWarning } from "@/lib/budget-warning";
 import { useProjectSocket } from "@/lib/use-project-socket";
+import { useStageStatusLabels } from "@/lib/use-stage-status-labels";
 import {
-  STAGE_STATUS_LABELS,
   type DiaryEntry,
   type Expense,
   type Project,
@@ -43,6 +44,8 @@ export function StageWorkspace({
   initialDiaryEntries: DiaryEntry[];
   initialTasks: Task[];
 }) {
+  const t = useTranslations("stages");
+  const statusLabels = useStageStatusLabels();
   const queryClient = useQueryClient();
 
   useProjectSocket(projectId, () => {
@@ -77,15 +80,15 @@ export function StageWorkspace({
       queryClient.invalidateQueries({ queryKey: ["stages", projectId] });
       queryClient.invalidateQueries({ queryKey: ["summary", projectId] });
     },
-    onError: (err) => setStatusError(err instanceof ClientApiError ? err.message : "Nie udało się zmienić statusu"),
+    onError: (err) => setStatusError(err instanceof ClientApiError ? err.message : t("genericStatusError")),
   });
 
-  const warning = getStageBudgetWarning(stage, summary);
+  const warning = getStageBudgetWarning(stage, summary, t);
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-12">
       <Link href={`/dashboard/${projectId}`} className="text-sm underline">
-        ← {project.name}
+        {t("backTo", { name: project.name })}
       </Link>
 
       <div className="mb-2 mt-4 flex items-start justify-between">
@@ -93,7 +96,7 @@ export function StageWorkspace({
           <h1 className="text-2xl font-semibold">{stage.name}</h1>
           {stage.plannedBudget && (
             <p className="text-sm text-gray-500">
-              Planowane: {Number(stage.plannedBudget).toLocaleString("pl-PL")} PLN
+              {t("planned", { amount: Number(stage.plannedBudget).toLocaleString("pl-PL") })}
             </p>
           )}
           {warning && (
@@ -105,7 +108,7 @@ export function StageWorkspace({
           onChange={(e) => updateStatus.mutate(e.target.value as StageStatus)}
           className="rounded border border-gray-300 px-2 py-1 text-sm"
         >
-          {Object.entries(STAGE_STATUS_LABELS).map(([value, label]) => (
+          {Object.entries(statusLabels).map(([value, label]) => (
             <option key={value} value={value}>
               {label}
             </option>

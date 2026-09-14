@@ -1,19 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
 import type { Report, ReportStatus } from "@/lib/types";
 
-const STATUS_LABELS: Record<ReportStatus, string> = {
-  pending: "Generowanie...",
-  completed: "Gotowy",
-  failed: "Błąd",
-};
-
 const POLL_INTERVAL_MS = 3000;
 
 export function ReportPanel({ projectId, initialReports }: { projectId: string; initialReports: Report[] }) {
+  const t = useTranslations("reports");
+  const statusLabels: Record<ReportStatus, string> = {
+    pending: t("statusPending"),
+    completed: t("statusCompleted"),
+    failed: t("statusFailed"),
+  };
   const queryClient = useQueryClient();
   const queryKey = ["reports", projectId];
 
@@ -35,7 +36,7 @@ export function ReportPanel({ projectId, initialReports }: { projectId: string; 
       setError(null);
       queryClient.invalidateQueries({ queryKey });
     },
-    onError: (err) => setError(err instanceof ClientApiError ? err.message : "Nie udało się zamówić raportu"),
+    onError: (err) => setError(err instanceof ClientApiError ? err.message : t("genericRequestError")),
   });
 
   // The list endpoint doesn't include a downloadUrl (presigned URLs expire in
@@ -46,24 +47,24 @@ export function ReportPanel({ projectId, initialReports }: { projectId: string; 
     onSuccess: (report) => {
       if (report.downloadUrl) window.open(report.downloadUrl, "_blank");
     },
-    onError: (err) => setError(err instanceof ClientApiError ? err.message : "Nie udało się pobrać raportu"),
+    onError: (err) => setError(err instanceof ClientApiError ? err.message : t("genericDownloadError")),
   });
 
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Raporty bankowe</h2>
+        <h2 className="text-lg font-semibold">{t("title")}</h2>
         <button
           onClick={() => requestReport.mutate()}
           disabled={requestReport.isPending}
           className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
         >
-          Wygeneruj raport
+          {t("generate")}
         </button>
       </div>
 
       {reports.length === 0 ? (
-        <p className="text-sm text-gray-500">Brak raportów.</p>
+        <p className="text-sm text-gray-500">{t("empty")}</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {reports.map((report) => (
@@ -83,10 +84,10 @@ export function ReportPanel({ projectId, initialReports }: { projectId: string; 
                   disabled={downloadReport.isPending}
                   className="text-sm underline disabled:opacity-50"
                 >
-                  Pobierz PDF
+                  {t("download")}
                 </button>
               ) : (
-                <span className="text-sm text-gray-500">{STATUS_LABELS[report.status]}</span>
+                <span className="text-sm text-gray-500">{statusLabels[report.status]}</span>
               )}
             </li>
           ))}
