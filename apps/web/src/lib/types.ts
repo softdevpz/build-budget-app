@@ -123,3 +123,20 @@ export interface Report {
   completedAt: string | null;
   downloadUrl?: string;
 }
+
+export interface Task {
+  id: string;
+  projectId: string;
+  stageId: string | null;
+  title: string;
+  dueDate: string | null;
+  done: boolean;
+  remindedAt: string | null;
+}
+
+export interface BenchmarkStat {
+  region: string;
+  stageCategory: string;
+  avgCostPerM2: number;
+  sampleSize: number;
+}

@@ -15,10 +15,12 @@ import {
   type ProjectSummary,
   type Stage,
   type StageStatus,
+  type Task,
 } from "@/lib/types";
 import { ExpensePanel } from "../../expense-panel";
 import { DocumentPanel } from "../../document-panel";
 import { DiaryPanel } from "../../diary-panel";
+import { TaskPanel } from "../../task-panel";
 
 export function StageWorkspace({
   projectId,
@@ -29,6 +31,7 @@ export function StageWorkspace({
   initialExpenses,
   initialDocuments,
   initialDiaryEntries,
+  initialTasks,
 }: {
   projectId: string;
   project: Project;
@@ -38,6 +41,7 @@ export function StageWorkspace({
   initialExpenses: Expense[];
   initialDocuments: ProjectDocument[];
   initialDiaryEntries: DiaryEntry[];
+  initialTasks: Task[];
 }) {
   const queryClient = useQueryClient();
 
@@ -110,7 +114,7 @@ export function StageWorkspace({
       </div>
       {statusError && <p className="mb-4 text-sm text-red-600">{statusError}</p>}
 
-      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded border border-gray-200 p-4">
           <ExpensePanel
             projectId={projectId}
@@ -134,6 +138,9 @@ export function StageWorkspace({
             stages={stages}
             stageFilter={stage.id}
           />
+        </div>
+        <div className="rounded border border-gray-200 p-4">
+          <TaskPanel projectId={projectId} initialTasks={initialTasks} stages={stages} stageFilter={stage.id} />
         </div>
       </div>
     </main>
