@@ -25,6 +25,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <Link href="/dashboard" className="text-sm underline">
                   Pulpit
                 </Link>
+                <Link href="/billing" className="text-sm underline">
+                  Plan
+                </Link>
                 <LogoutButton />
               </>
             ) : (

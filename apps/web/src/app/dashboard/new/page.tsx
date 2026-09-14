@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
 import type { Project } from "@/lib/types";
 
@@ -14,11 +15,13 @@ export default function NewProjectPage() {
   const [startDate, setStartDate] = useState("");
   const [targetBudget, setTargetBudget] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [planLimitReached, setPlanLimitReached] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setPlanLimitReached(false);
     setIsSubmitting(true);
 
     try {
@@ -37,7 +40,7 @@ export default function NewProjectPage() {
       router.refresh();
     } catch (err) {
       if (err instanceof ClientApiError && err.status === 402) {
-        setError("Twój darmowy plan pozwala tylko na 1 projekt. Ulepsz do Premium, żeby dodać kolejny.");
+        setPlanLimitReached(true);
       } else {
         setError(err instanceof ClientApiError ? err.message : "Nie udało się utworzyć projektu");
       }
@@ -107,6 +110,15 @@ export default function NewProjectPage() {
           />
         </label>
         {error && <p className="text-sm text-red-600">{error}</p>}
+        {planLimitReached && (
+          <p className="text-sm text-red-600">
+            Twój darmowy plan pozwala tylko na 1 projekt.{" "}
+            <Link href="/billing" className="underline">
+              Ulepsz do Premium
+            </Link>
+            , żeby dodać kolejny.
+          </p>
+        )}
         <button
           type="submit"
           disabled={isSubmitting}
