@@ -90,6 +90,27 @@ export interface ProjectMember {
   user: { email: string };
 }
 
+// Not a literal union ("active" | "trialing" | ... | string) — TypeScript
+// collapses a union of literals with a bare `string` member back down to
+// plain `string`, silently discarding the literals and any autocomplete/typo
+// protection they'd give. Our own DB column is an unconstrained `String`
+// anyway (Subscription.status in schema.prisma), so there's nothing to
+// narrow against honestly; SUBSCRIPTION_STATUS_LABELS's `?? status` fallback
+// already covers any Stripe status we haven't added a label for.
+export type SubscriptionStatus = string;
+
+export const SUBSCRIPTION_STATUS_LABELS: Record<string, string> = {
+  active: "Aktywna",
+  trialing: "Okres próbny",
+  past_due: "Zaległa płatność",
+  canceled: "Anulowana",
+};
+
+export interface BillingStatus {
+  plan: "free" | "premium";
+  subscription: { status: SubscriptionStatus; currentPeriodEnd: string } | null;
+}
+
 export type ReportStatus = "pending" | "completed" | "failed";
 
 export interface Report {

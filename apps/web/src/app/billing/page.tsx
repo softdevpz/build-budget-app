@@ -1,21 +1,8 @@
 import { redirect } from "next/navigation";
 import { callNestApi } from "@/lib/api-server";
 import { getAccessToken } from "@/lib/cookies";
+import { SUBSCRIPTION_STATUS_LABELS, type BillingStatus } from "@/lib/types";
 import { UpgradeButton } from "./upgrade-button";
-
-type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled" | string;
-
-type BillingStatus = {
-  plan: "free" | "premium";
-  subscription: { status: SubscriptionStatus; currentPeriodEnd: string } | null;
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  active: "Aktywna",
-  trialing: "Okres próbny",
-  past_due: "Zaległa płatność",
-  canceled: "Anulowana",
-};
 
 export default async function BillingPage() {
   const token = await getAccessToken();
@@ -35,7 +22,8 @@ export default async function BillingPage() {
         <p className="text-lg font-semibold">{billing.plan === "premium" ? "Premium" : "Darmowy"}</p>
         {billing.subscription && (
           <p className="mt-1 text-xs text-gray-500">
-            Status: {STATUS_LABELS[billing.subscription.status] ?? billing.subscription.status} · odnowienie{" "}
+            Status: {SUBSCRIPTION_STATUS_LABELS[billing.subscription.status] ?? billing.subscription.status} ·
+            odnowienie{" "}
             {new Date(billing.subscription.currentPeriodEnd).toLocaleDateString("pl-PL")}
           </p>
         )}
