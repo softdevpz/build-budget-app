@@ -9,25 +9,31 @@ export function ExpensePanel({
   projectId,
   initialExpenses,
   stages,
+  stageFilter,
 }: {
   projectId: string;
   initialExpenses: Expense[];
   stages: Stage[];
+  /** Show only this stage's expenses; omit to show only unassigned ("Bez etapu") ones. */
+  stageFilter?: string;
 }) {
   const queryClient = useQueryClient();
   const queryKey = ["expenses", projectId];
 
-  const { data: expenses = [] } = useQuery({
+  const { data: allExpenses = [] } = useQuery({
     queryKey,
     queryFn: () => apiFetch<Expense[]>(`/projects/${projectId}/expenses`),
     initialData: initialExpenses,
   });
+  const expenses = allExpenses.filter((expense) =>
+    stageFilter !== undefined ? expense.stageId === stageFilter : expense.stageId === null,
+  );
 
   const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [vendor, setVendor] = useState("");
-  const [stageId, setStageId] = useState("");
+  const [stageId, setStageId] = useState(stageFilter ?? "");
   const [error, setError] = useState<string | null>(null);
 
   function invalidate() {
@@ -51,7 +57,7 @@ export function ExpensePanel({
       setCategory("");
       setAmount("");
       setVendor("");
-      setStageId("");
+      setStageId(stageFilter ?? "");
       setError(null);
       invalidate();
     },

@@ -96,7 +96,7 @@ export default function NewProjectPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">Budżet docelowy</span>
+          <span className="text-sm text-gray-700">Budżet docelowy (opcjonalnie, możesz dodać później)</span>
           <input
             type="number"
             min="0"

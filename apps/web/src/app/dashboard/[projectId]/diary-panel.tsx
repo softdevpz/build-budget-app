@@ -9,23 +9,29 @@ export function DiaryPanel({
   projectId,
   initialEntries,
   stages,
+  stageFilter,
 }: {
   projectId: string;
   initialEntries: DiaryEntry[];
   stages: Stage[];
+  /** Show only this stage's entries; omit to show only unassigned ("Bez etapu") ones. */
+  stageFilter?: string;
 }) {
   const queryClient = useQueryClient();
   const queryKey = ["diary", projectId];
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: entries = [] } = useQuery({
+  const { data: allEntries = [] } = useQuery({
     queryKey,
     queryFn: () => apiFetch<DiaryEntry[]>(`/projects/${projectId}/diary`),
     initialData: initialEntries,
   });
+  const entries = allEntries.filter((entry) =>
+    stageFilter !== undefined ? entry.stageId === stageFilter : entry.stageId === null,
+  );
 
   const [text, setText] = useState("");
-  const [stageId, setStageId] = useState("");
+  const [stageId, setStageId] = useState(stageFilter ?? "");
   const [error, setError] = useState<string | null>(null);
 
   function invalidate() {
@@ -66,7 +72,7 @@ export function DiaryPanel({
     },
     onSuccess: () => {
       setText("");
-      setStageId("");
+      setStageId(stageFilter ?? "");
       if (fileInputRef.current) fileInputRef.current.value = "";
       setError(null);
       invalidate();

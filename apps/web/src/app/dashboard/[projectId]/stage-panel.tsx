@@ -1,19 +1,11 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
-import type { ProjectSummary, Stage, StageStatus } from "@/lib/types";
-
-const STATUS_LABELS: Record<StageStatus, string> = {
-  pending: "Zaplanowany",
-  in_progress: "W trakcie",
-  done: "Zakończony",
-};
-
-// Mirrors the "X% budżetu etapu wykorzystane" warning pattern from Staveo —
-// surface the overrun before/as it happens, not just in the final total.
-const BUDGET_WARNING_THRESHOLD = 0.9;
+import { getStageBudgetWarning } from "@/lib/budget-warning";
+import { STAGE_STATUS_LABELS, type ProjectSummary, type Stage, type StageStatus } from "@/lib/types";
 
 export function StagePanel({
   projectId,
@@ -78,22 +70,6 @@ export function StagePanel({
     createStage.mutate();
   }
 
-  function budgetWarning(stage: Stage): { message: string; isOver: boolean } | null {
-    if (!stage.plannedBudget) return null;
-    const spent = summary.stages.find((s) => s.id === stage.id)?.spent ?? 0;
-    const planned = Number(stage.plannedBudget);
-    const ratio = spent / planned;
-    if (ratio < BUDGET_WARNING_THRESHOLD) return null;
-    const pct = Math.round(ratio * 100);
-    return {
-      isOver: ratio >= 1,
-      message:
-        ratio >= 1
-          ? `Przekroczono budżet etapu — wykorzystano ${pct}%`
-          : `${pct}% budżetu etapu wykorzystane, zbliżasz się do limitu`,
-    };
-  }
-
   return (
     <section>
       <h2 className="mb-3 text-lg font-semibold">Etapy</h2>
@@ -102,14 +78,16 @@ export function StagePanel({
       ) : (
         <ul className="mb-4 flex flex-col gap-2">
           {stages.map((stage) => {
-            const warning = budgetWarning(stage);
+            const warning = getStageBudgetWarning(stage, summary);
             return (
             <li
               key={stage.id}
               className="flex items-center justify-between rounded border border-gray-200 px-3 py-2"
             >
               <div>
-                <p className="font-medium">{stage.name}</p>
+                <Link href={`/dashboard/${projectId}/stages/${stage.id}`} className="font-medium underline">
+                  {stage.name}
+                </Link>
                 {stage.plannedBudget && (
                   <p className="text-xs text-gray-500">
                     Planowane: {Number(stage.plannedBudget).toLocaleString("pl-PL")} PLN
@@ -129,7 +107,7 @@ export function StagePanel({
                   }
                   className="rounded border border-gray-300 px-2 py-1 text-xs"
                 >
-                  {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                  {Object.entries(STAGE_STATUS_LABELS).map(([value, label]) => (
                     <option key={value} value={value}>
                       {label}
                     </option>
@@ -160,7 +138,7 @@ export function StagePanel({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">Planowany budżet</span>
+          <span className="text-xs text-gray-700">Planowany budżet (opcjonalnie)</span>
           <input
             type="number"
             min="0"
