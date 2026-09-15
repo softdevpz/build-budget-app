@@ -19,7 +19,7 @@ export default async function DashboardPage() {
     <main className="mx-auto max-w-3xl px-4 py-12">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <Link href="/dashboard/new" className="rounded bg-gray-900 px-4 py-2 text-sm text-white">
+        <Link href="/dashboard/new" className="rounded bg-gray-900 px-4 py-2 text-base text-white">
           {t("newProject")}
         </Link>
       </div>
@@ -35,7 +35,7 @@ export default async function DashboardPage() {
                 className="block rounded border border-gray-200 px-4 py-3 hover:border-gray-400"
               >
                 <p className="font-medium">{project.name}</p>
-                {project.address && <p className="text-sm text-gray-500">{project.address}</p>}
+                {project.address && <p className="text-base text-gray-600">{project.address}</p>}
               </Link>
             </li>
           ))}

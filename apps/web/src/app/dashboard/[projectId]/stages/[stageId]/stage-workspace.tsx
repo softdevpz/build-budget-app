@@ -87,7 +87,7 @@ export function StageWorkspace({
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-12">
-      <Link href={`/dashboard/${projectId}`} className="text-sm underline">
+      <Link href={`/dashboard/${projectId}`} className="text-base underline">
         {t("backTo", { name: project.name })}
       </Link>
 
@@ -95,18 +95,18 @@ export function StageWorkspace({
         <div>
           <h1 className="text-2xl font-semibold">{stage.name}</h1>
           {stage.plannedBudget && (
-            <p className="text-sm text-gray-500">
+            <p className="text-base text-gray-600">
               {t("planned", { amount: Number(stage.plannedBudget).toLocaleString("pl-PL") })}
             </p>
           )}
           {warning && (
-            <p className={`text-sm ${warning.isOver ? "text-red-600" : "text-amber-600"}`}>{warning.message}</p>
+            <p className={`text-base ${warning.isOver ? "text-red-600" : "text-amber-600"}`}>{warning.message}</p>
           )}
         </div>
         <select
           value={stage.status}
           onChange={(e) => updateStatus.mutate(e.target.value as StageStatus)}
-          className="rounded border border-gray-300 px-2 py-1 text-sm"
+          className="rounded border border-gray-300 px-3 py-2 text-base"
         >
           {Object.entries(statusLabels).map(([value, label]) => (
             <option key={value} value={value}>
@@ -115,7 +115,7 @@ export function StageWorkspace({
           ))}
         </select>
       </div>
-      {statusError && <p className="mb-4 text-sm text-red-600">{statusError}</p>}
+      {statusError && <p className="mb-4 text-base text-red-600">{statusError}</p>}
 
       <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded border border-gray-200 p-4">

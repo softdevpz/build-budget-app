@@ -16,7 +16,7 @@ export function BudgetChart({ summary }: { summary: ProjectSummary }) {
   ];
 
   if (data.length === 0) {
-    return <p className="text-sm text-gray-500">Dodaj etap, żeby zobaczyć wykres budżetu.</p>;
+    return <p className="text-base text-gray-600">Dodaj etap, żeby zobaczyć wykres budżetu.</p>;
   }
 
   return (

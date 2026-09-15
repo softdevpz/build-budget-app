@@ -102,26 +102,26 @@ export function DiaryPanel({
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">{t("title")}</h2>
+      <h2 className="mb-3 text-xl font-semibold">{t("title")}</h2>
       {entries.length === 0 ? (
-        <p className="mb-4 text-sm text-gray-500">{t("empty")}</p>
+        <p className="mb-4 text-base text-gray-600">{t("empty")}</p>
       ) : (
         <ul className="mb-4 flex flex-col gap-3">
           {entries.map((entry) => (
             <li key={entry.id} className="rounded border border-gray-200 px-3 py-2">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-base text-gray-600">
                     {new Date(entry.createdAt).toLocaleString("pl-PL")} · {entry.author.email}
                     {stageName(entry.stageId) ? ` · ${stageName(entry.stageId)}` : ""}
                   </p>
-                  <p className="mt-1 text-sm">{entry.text}</p>
+                  <p className="mt-1 text-base">{entry.text}</p>
                 </div>
                 <button
                   onClick={() => {
                     if (confirm(t("confirmDelete"))) deleteEntry.mutate(entry.id);
                   }}
-                  className="text-xs text-red-600 underline"
+                  className="text-base text-red-600 underline"
                 >
                   {tc("delete")}
                 </button>
@@ -151,15 +151,15 @@ export function DiaryPanel({
           onChange={(e) => setText(e.target.value)}
           placeholder={t("placeholder")}
           rows={2}
-          className="rounded border border-gray-300 px-2 py-1 text-sm"
+          className="rounded border border-gray-300 px-3 py-2 text-base"
         />
         <div className="flex flex-wrap items-end gap-2">
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-gray-700">{t("stage")}</span>
+            <span className="text-base text-gray-700">{t("stage")}</span>
             <select
               value={stageId}
               onChange={(e) => setStageId(e.target.value)}
-              className="rounded border border-gray-300 px-2 py-1 text-sm"
+              className="rounded border border-gray-300 px-3 py-2 text-base"
             >
               <option value="">{t("noStage")}</option>
               {stages.map((stage) => (
@@ -170,19 +170,19 @@ export function DiaryPanel({
             </select>
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-gray-700">{t("photos")}</span>
-            <input ref={fileInputRef} type="file" accept="image/*" multiple className="text-sm" />
+            <span className="text-base text-gray-700">{t("photos")}</span>
+            <input ref={fileInputRef} type="file" accept="image/*" multiple className="text-base" />
           </label>
           <button
             type="submit"
             disabled={createEntry.isPending}
-            className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+            className="rounded bg-gray-900 px-4 py-2 text-base text-white disabled:opacity-50"
           >
             {createEntry.isPending ? t("saving") : t("add")}
           </button>
         </div>
       </form>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-base text-red-600">{error}</p>}
     </section>
   );
 }

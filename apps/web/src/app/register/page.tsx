@@ -53,7 +53,7 @@ export default function RegisterPage() {
       <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">{t("email")}</span>
+          <span className="text-base text-gray-700">{t("email")}</span>
           <input
             type="email"
             required
@@ -63,7 +63,7 @@ export default function RegisterPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">{t("password")}</span>
+          <span className="text-base text-gray-700">{t("password")}</span>
           <PasswordInput
             required
             minLength={8}
@@ -73,9 +73,9 @@ export default function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded border border-gray-300 px-3 py-2"
           />
-          <span className="text-xs text-gray-500">{t("passwordHint")}</span>
+          <span className="text-base text-gray-600">{t("passwordHint")}</span>
         </label>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-base text-red-600">{error}</p>}
         <button
           type="submit"
           disabled={isSubmitting}
@@ -84,7 +84,7 @@ export default function RegisterPage() {
           {isSubmitting ? t("submitting") : t("submit")}
         </button>
       </form>
-      <p className="mt-4 text-sm text-gray-600">
+      <p className="mt-4 text-base text-gray-600">
         {t("hasAccount")}{" "}
         <Link href="/login" className="underline">
           {t("loginLink")}

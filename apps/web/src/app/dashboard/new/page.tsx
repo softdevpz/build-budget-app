@@ -56,7 +56,7 @@ export default function NewProjectPage() {
       <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">{t("name")}</span>
+          <span className="text-base text-gray-700">{t("name")}</span>
           <input
             required
             value={name}
@@ -65,7 +65,7 @@ export default function NewProjectPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">{t("address")}</span>
+          <span className="text-base text-gray-700">{t("address")}</span>
           <input
             value={address}
             onChange={(e) => setAddress(e.target.value)}
@@ -73,7 +73,7 @@ export default function NewProjectPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">{t("region")}</span>
+          <span className="text-base text-gray-700">{t("region")}</span>
           <input
             value={region}
             onChange={(e) => setRegion(e.target.value)}
@@ -81,7 +81,7 @@ export default function NewProjectPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">{t("area")}</span>
+          <span className="text-base text-gray-700">{t("area")}</span>
           <input
             type="number"
             min="0"
@@ -92,7 +92,7 @@ export default function NewProjectPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">{t("startDate")}</span>
+          <span className="text-base text-gray-700">{t("startDate")}</span>
           <input
             type="date"
             value={startDate}
@@ -101,7 +101,7 @@ export default function NewProjectPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">{t("targetBudget")}</span>
+          <span className="text-base text-gray-700">{t("targetBudget")}</span>
           <input
             type="number"
             min="0"
@@ -111,9 +111,9 @@ export default function NewProjectPage() {
             className="rounded border border-gray-300 px-3 py-2"
           />
         </label>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-base text-red-600">{error}</p>}
         {planLimitReached && (
-          <p className="text-sm text-red-600">
+          <p className="text-base text-red-600">
             {t.rich("planLimitReached", {
               upgrade: (chunks) => (
                 <Link href="/billing" className="underline">

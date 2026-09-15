@@ -58,7 +58,7 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">{t("title")}</h2>
+      <h2 className="mb-3 text-xl font-semibold">{t("title")}</h2>
       <ul className="mb-4 flex flex-col gap-2">
         {members.map((member) => (
           <li
@@ -67,14 +67,14 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
           >
             <div>
               <p className="font-medium">{member.user.email}</p>
-              <p className="text-xs text-gray-500">{roleLabels[member.role]}</p>
+              <p className="text-base text-gray-600">{roleLabels[member.role]}</p>
             </div>
             {member.role !== "owner" && (
               <button
                 onClick={() => {
                   if (confirm(t("confirmRemove", { email: member.user.email }))) removeMember.mutate(member.id);
                 }}
-                className="text-xs text-red-600 underline"
+                className="text-base text-red-600 underline"
               >
                 {tc("delete")}
               </button>
@@ -85,24 +85,24 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
 
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">{t("emailLabel")}</span>
+          <span className="text-base text-gray-700">{t("emailLabel")}</span>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded border border-gray-300 px-2 py-1 text-sm"
+            className="rounded border border-gray-300 px-3 py-2 text-base"
           />
         </label>
         <button
           type="submit"
           disabled={inviteMember.isPending}
-          className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+          className="rounded bg-gray-900 px-4 py-2 text-base text-white disabled:opacity-50"
         >
           {t("invite")}
         </button>
       </form>
-      <p className="mt-1 text-xs text-gray-500">{t("hint")}</p>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      <p className="mt-1 text-base text-gray-600">{t("hint")}</p>
+      {error && <p className="mt-2 text-base text-red-600">{error}</p>}
     </section>
   );
 }
