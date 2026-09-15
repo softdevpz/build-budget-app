@@ -25,7 +25,7 @@ export function BenchmarkTable({ stats }: { stats: BenchmarkStat[] }) {
         <select
           value={region}
           onChange={(e) => setRegion(e.target.value)}
-          className="rounded border border-gray-300 px-2 py-1 text-sm"
+          className="rounded border border-gray-300 px-3 py-2 text-base"
         >
           <option value="">{t("allRegions")}</option>
           {regions.map((r) => (
@@ -37,7 +37,7 @@ export function BenchmarkTable({ stats }: { stats: BenchmarkStat[] }) {
         <select
           value={stageCategory}
           onChange={(e) => setStageCategory(e.target.value)}
-          className="rounded border border-gray-300 px-2 py-1 text-sm"
+          className="rounded border border-gray-300 px-3 py-2 text-base"
         >
           <option value="">{t("allStages")}</option>
           {stageCategories.map((c) => (
@@ -49,11 +49,11 @@ export function BenchmarkTable({ stats }: { stats: BenchmarkStat[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-gray-500">{t("noResults")}</p>
+        <p className="text-base text-gray-600">{t("noResults")}</p>
       ) : (
-        <table className="w-full text-left text-sm">
+        <table className="w-full text-left text-base">
           <thead>
-            <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+            <tr className="border-b border-gray-200 text-base uppercase tracking-wide text-gray-600">
               <th className="py-2">{t("region")}</th>
               <th className="py-2">{t("stage")}</th>
               <th className="py-2">{t("avgCost")}</th>
@@ -66,7 +66,7 @@ export function BenchmarkTable({ stats }: { stats: BenchmarkStat[] }) {
                 <td className="py-2">{stat.region}</td>
                 <td className="py-2 capitalize">{stat.stageCategory}</td>
                 <td className="py-2">{stat.avgCostPerM2.toLocaleString("pl-PL", { maximumFractionDigits: 0 })} PLN</td>
-                <td className="py-2 text-gray-500">{stat.sampleSize}</td>
+                <td className="py-2 text-gray-600">{stat.sampleSize}</td>
               </tr>
             ))}
           </tbody>

@@ -27,25 +27,25 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {t("brand")}
             </Link>
             <nav className="flex items-center gap-4">
-              <Link href="/benchmark" className="text-sm underline">
+              <Link href="/benchmark" className="text-base underline">
                 {t("benchmark")}
               </Link>
               {isLoggedIn ? (
                 <>
-                  <Link href="/dashboard" className="text-sm underline">
+                  <Link href="/dashboard" className="text-base underline">
                     {t("dashboard")}
                   </Link>
-                  <Link href="/billing" className="text-sm underline">
+                  <Link href="/billing" className="text-base underline">
                     {t("billing")}
                   </Link>
                   <LogoutButton />
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="text-sm underline">
+                  <Link href="/login" className="text-base underline">
                     {t("login")}
                   </Link>
-                  <Link href="/register" className="text-sm underline">
+                  <Link href="/register" className="text-base underline">
                     {t("register")}
                   </Link>
                 </>

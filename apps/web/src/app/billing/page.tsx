@@ -27,10 +27,10 @@ export default async function BillingPage() {
       <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
 
       <div className="mb-6 rounded border border-gray-200 px-4 py-3">
-        <p className="text-xs text-gray-500">{t("currentPlan")}</p>
-        <p className="text-lg font-semibold">{billing.plan === "premium" ? t("planPremium") : t("planFree")}</p>
+        <p className="text-base text-gray-600">{t("currentPlan")}</p>
+        <p className="text-xl font-semibold">{billing.plan === "premium" ? t("planPremium") : t("planFree")}</p>
         {billing.subscription && (
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-base text-gray-600">
             {t("statusLine", {
               status: statusLabels[billing.subscription.status] ?? billing.subscription.status,
               date: new Date(billing.subscription.currentPeriodEnd).toLocaleDateString("pl-PL"),
@@ -41,11 +41,11 @@ export default async function BillingPage() {
 
       {billing.plan === "free" ? (
         <>
-          <p className="mb-4 text-sm text-gray-600">{t("freeDescription")}</p>
+          <p className="mb-4 text-base text-gray-600">{t("freeDescription")}</p>
           <UpgradeButton />
         </>
       ) : (
-        <p className="text-sm text-gray-600">{t("premiumThanks")}</p>
+        <p className="text-base text-gray-600">{t("premiumThanks")}</p>
       )}
     </main>
   );

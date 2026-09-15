@@ -13,7 +13,7 @@ export function PasswordInput(props: InputHTMLAttributes<HTMLInputElement>) {
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
-        className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-600 underline"
+        className="absolute right-2 top-1/2 -translate-y-1/2 text-base text-gray-600 underline"
       >
         {visible ? t("hide") : t("show")}
       </button>

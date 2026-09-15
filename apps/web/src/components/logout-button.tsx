@@ -17,7 +17,7 @@ export function LogoutButton() {
   }
 
   return (
-    <button onClick={handleLogout} disabled={isLoggingOut} className="text-sm underline disabled:opacity-50">
+    <button onClick={handleLogout} disabled={isLoggingOut} className="text-base underline disabled:opacity-50">
       {t("logout")}
     </button>
   );

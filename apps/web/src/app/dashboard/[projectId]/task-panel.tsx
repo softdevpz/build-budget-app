@@ -84,9 +84,9 @@ export function TaskPanel({
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">{t("title")}</h2>
+      <h2 className="mb-3 text-xl font-semibold">{t("title")}</h2>
       {tasks.length === 0 ? (
-        <p className="mb-4 text-sm text-gray-500">{t("empty")}</p>
+        <p className="mb-4 text-base text-gray-600">{t("empty")}</p>
       ) : (
         <ul className="mb-4 flex flex-col gap-2">
           {tasks.map((task) => (
@@ -101,9 +101,9 @@ export function TaskPanel({
                   onChange={(e) => toggleDone.mutate({ taskId: task.id, done: e.target.checked })}
                 />
                 <span>
-                  <p className={task.done ? "line-through text-gray-400" : "font-medium"}>{task.title}</p>
+                  <p className={task.done ? "line-through text-gray-500" : "font-medium"}>{task.title}</p>
                   {task.dueDate && (
-                    <p className={`text-xs ${isOverdue(task) ? "text-red-600" : "text-gray-500"}`}>
+                    <p className={`text-base ${isOverdue(task) ? "text-red-600" : "text-gray-600"}`}>
                       {t("dueDateLabel", { date: new Date(task.dueDate).toLocaleDateString("pl-PL") })}
                       {isOverdue(task) ? t("overdueSuffix") : ""}
                     </p>
@@ -114,7 +114,7 @@ export function TaskPanel({
                 onClick={() => {
                   if (confirm(t("confirmDelete", { title: task.title }))) deleteTask.mutate(task.id);
                 }}
-                className="text-xs text-red-600 underline"
+                className="text-base text-red-600 underline"
               >
                 {tc("delete")}
               </button>
@@ -125,28 +125,28 @@ export function TaskPanel({
 
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">{t("nameLabel")}</span>
+          <span className="text-base text-gray-700">{t("nameLabel")}</span>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="rounded border border-gray-300 px-2 py-1 text-sm"
+            className="rounded border border-gray-300 px-3 py-2 text-base"
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">{t("dueDate")}</span>
+          <span className="text-base text-gray-700">{t("dueDate")}</span>
           <input
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            className="rounded border border-gray-300 px-2 py-1 text-sm"
+            className="rounded border border-gray-300 px-3 py-2 text-base"
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-gray-700">{t("stage")}</span>
+          <span className="text-base text-gray-700">{t("stage")}</span>
           <select
             value={stageId}
             onChange={(e) => setStageId(e.target.value)}
-            className="rounded border border-gray-300 px-2 py-1 text-sm"
+            className="rounded border border-gray-300 px-3 py-2 text-base"
           >
             <option value="">{t("noStage")}</option>
             {stages.map((stage) => (
@@ -159,12 +159,12 @@ export function TaskPanel({
         <button
           type="submit"
           disabled={createTask.isPending}
-          className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+          className="rounded bg-gray-900 px-4 py-2 text-base text-white disabled:opacity-50"
         >
           {t("add")}
         </button>
       </form>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-base text-red-600">{error}</p>}
     </section>
   );
 }

@@ -21,7 +21,7 @@ export function LanguageSwitcher() {
   }
 
   return (
-    <div className="flex items-center gap-1 text-sm">
+    <div className="flex items-center gap-1 text-base">
       {SUPPORTED_LOCALES.map((code) => (
         <button
           key={code}

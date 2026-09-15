@@ -61,7 +61,7 @@ export default function LoginPage() {
       <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">{t("email")}</span>
+          <span className="text-base text-gray-700">{t("email")}</span>
           <input
             type="email"
             required
@@ -71,7 +71,7 @@ export default function LoginPage() {
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-gray-700">{t("password")}</span>
+          <span className="text-base text-gray-700">{t("password")}</span>
           <PasswordInput
             required
             value={password}
@@ -79,9 +79,9 @@ export default function LoginPage() {
             className="w-full rounded border border-gray-300 px-3 py-2"
           />
         </label>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-base text-red-600">{error}</p>}
         {needsVerification && (
-          <div className="rounded border border-amber-300 bg-amber-50 p-3 text-sm">
+          <div className="rounded border border-amber-300 bg-amber-50 p-3 text-base">
             <p>{t("needsVerification")}</p>
             {resendStatus === "sent" ? (
               <p className="mt-1 text-green-700">{t("resendSent")}</p>
@@ -105,7 +105,7 @@ export default function LoginPage() {
           {isSubmitting ? t("submitting") : t("submit")}
         </button>
       </form>
-      <p className="mt-4 text-sm text-gray-600">
+      <p className="mt-4 text-base text-gray-600">
         {t("noAccount")}{" "}
         <Link href="/register" className="underline">
           {t("registerLink")}

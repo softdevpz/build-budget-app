@@ -6,12 +6,14 @@ Monorepo: Next.js (`apps/web`) + Nest.js (`apps/api`), PostgreSQL + Redis via Do
 
 **Live:** [build-budget-app-web.vercel.app](https://build-budget-app-web.vercel.app) (frontend, Vercel) · API on Railway.
 
+See **[ARCHITECTURE.md](ARCHITECTURE.md)** (also available [in Polish](ARCHITECTURE.pl.md)) for the full write-up of *why* the project is built this way — auth design, the refresh-token race condition and its fix, Stripe webhook mechanics, the Railway-vs-AWS deployment decision, and more. Written for a junior developer new to this stack.
+
 ## Stack
 
-- **Frontend:** Next.js (App Router), TypeScript, Tailwind CSS, TanStack Query, Recharts
+- **Frontend:** Next.js (App Router), TypeScript, Tailwind CSS, TanStack Query, Recharts, Socket.io client, next-intl (PL/EN)
 - **Backend:** Nest.js, TypeScript, Prisma, PostgreSQL
 - **Auth:** JWT access + refresh tokens (Passport.js)
-- **Infra (planned):** Redis + BullMQ (background jobs), AWS S3 (file uploads), Stripe (billing), WebSockets (real-time collaboration)
+- **Infra:** Redis + BullMQ (background jobs), AWS S3 (file uploads), Stripe (billing), WebSockets (real-time collaboration)
 
 ## Getting started
 
@@ -108,9 +110,11 @@ docker-compose.yml -> Postgres + Redis + Mailpit (dev SMTP catcher, UI at http:/
 ### Frontend (`apps/web`)
 
 - [x] Auth foundation — login/register pages, httpOnly-cookie sessions via Next.js Route Handlers (`/api/auth/*`), a generic authenticated proxy (`/api/proxy/*`) with silent token refresh, route protection (`src/proxy.ts`)
-- [ ] Core budget UI — project list/create, stages, expenses, budget summary charts
-- [ ] Documents & reports UI
-- [ ] Collaboration & real-time UI
-- [ ] Billing UI
-- [ ] Benchmark & tasks UI
-- [ ] Bilingual UI (PL/EN)
+- [x] Core budget UI — project list/create, stages, expenses, budget summary chart, per-stage budget warnings
+- [x] Documents & reports UI — S3 upload flow, construction diary with photos, async bank-report generation/download
+- [x] Collaboration & real-time UI — project members (invite/list/remove), live Socket.io updates across everyone viewing a project
+- [x] Billing UI — plan status, Stripe Checkout redirect, success/cancel pages
+- [x] Benchmark & tasks UI — public cost/m² comparison page, per-stage task list feeding the deadline-reminder notifications
+- [x] Bilingual UI (PL/EN) — next-intl, cookie-based (no URL prefix), language switcher in the header
+
+Each stage has its own detail page (`/dashboard/:projectId/stages/:stageId`) with expenses, documents, diary, and tasks scoped to just that stage; unassigned items stay on the main project page.
