@@ -153,7 +153,7 @@ export function DiaryPanel({
           rows={2}
           className="rounded border border-gray-300 px-3 py-2 text-base"
         />
-        <div className="flex flex-wrap items-end gap-2">
+        <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1">
             <span className="text-base text-gray-700">{t("stage")}</span>
             <select
