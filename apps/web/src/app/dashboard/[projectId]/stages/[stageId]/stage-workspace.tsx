@@ -118,7 +118,7 @@ export function StageWorkspace({
       {statusError && <p className="mb-4 text-base text-red-600">{statusError}</p>}
 
       <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded border border-gray-200 p-4">
+        <div className="min-w-0 rounded border border-gray-200 p-4">
           <ExpensePanel
             projectId={projectId}
             initialExpenses={initialExpenses}
@@ -126,7 +126,7 @@ export function StageWorkspace({
             stageFilter={stage.id}
           />
         </div>
-        <div className="rounded border border-gray-200 p-4">
+        <div className="min-w-0 rounded border border-gray-200 p-4">
           <DocumentPanel
             projectId={projectId}
             initialDocuments={initialDocuments}
@@ -134,7 +134,7 @@ export function StageWorkspace({
             stageFilter={stage.id}
           />
         </div>
-        <div className="rounded border border-gray-200 p-4">
+        <div className="min-w-0 rounded border border-gray-200 p-4">
           <DiaryPanel
             projectId={projectId}
             initialEntries={initialDiaryEntries}
@@ -142,7 +142,7 @@ export function StageWorkspace({
             stageFilter={stage.id}
           />
         </div>
-        <div className="rounded border border-gray-200 p-4">
+        <div className="min-w-0 rounded border border-gray-200 p-4">
           <TaskPanel projectId={projectId} initialTasks={initialTasks} stages={stages} stageFilter={stage.id} />
         </div>
       </div>

@@ -83,7 +83,7 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
         ))}
       </ul>
 
-      <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <label className="flex flex-col gap-1">
           <span className="text-base text-gray-700">{t("emailLabel")}</span>
           <input
