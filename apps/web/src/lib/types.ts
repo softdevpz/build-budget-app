@@ -116,6 +116,19 @@ export interface Task {
   remindedAt: string | null;
 }
 
+export interface TwoFactorStatus {
+  enabled: boolean;
+}
+
+export interface TwoFactorSetup {
+  secret: string;
+  qrCodeDataUrl: string;
+}
+
+export interface TwoFactorEnableResult {
+  backupCodes: string[];
+}
+
 export interface BenchmarkStat {
   region: string;
   stageCategory: string;
