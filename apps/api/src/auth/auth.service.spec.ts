@@ -17,17 +17,36 @@ function makeMailServiceMock() {
   return { sendMail: jest.fn().mockResolvedValue(undefined) };
 }
 
+function makeRedisServiceMock() {
+  const store = new Map<string, string>();
+  return {
+    client: {
+      set: jest.fn((key: string, value: string) => {
+        store.set(key, value);
+        return Promise.resolve('OK');
+      }),
+      get: jest.fn((key: string) => Promise.resolve(store.get(key) ?? null)),
+      del: jest.fn((key: string) => {
+        store.delete(key);
+        return Promise.resolve(1);
+      }),
+    },
+  };
+}
+
 describe('AuthService', () => {
   let prisma: ReturnType<typeof makePrismaMock>;
   let jwtService: ReturnType<typeof makeJwtServiceMock>;
   let mailService: ReturnType<typeof makeMailServiceMock>;
+  let redis: ReturnType<typeof makeRedisServiceMock>;
   let service: AuthService;
 
   beforeEach(() => {
     prisma = makePrismaMock();
     jwtService = makeJwtServiceMock();
     mailService = makeMailServiceMock();
-    service = new AuthService(prisma as any, jwtService, mailService as any);
+    redis = makeRedisServiceMock();
+    service = new AuthService(prisma as any, jwtService, mailService as any, redis as any);
   });
 
   describe('register', () => {
@@ -72,6 +91,19 @@ describe('AuthService', () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
       await expect(service.login({ email: 'ghost@example.com', password: 'whatever1' })).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('rejects a Google-only account (no passwordHash) with the same 401, not a crash', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        email: 'a@example.com',
+        passwordHash: null,
+        emailVerifiedAt: new Date(),
+      });
+
+      await expect(service.login({ email: 'a@example.com', password: 'whatever1' })).rejects.toThrow(
         UnauthorizedException,
       );
     });
@@ -215,6 +247,80 @@ describe('AuthService', () => {
       // must not invalidate each other's refresh token — asserted here by
       // checking neither call writes hashedRefreshToken at all.
       expect(prisma.user.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findOrCreateGoogleUser', () => {
+    it('creates a new, already-verified user on first Google sign-in', async () => {
+      prisma.user.findUnique.mockResolvedValueOnce(null); // no match by googleId
+      prisma.user.findUnique.mockResolvedValueOnce(null); // no match by email either
+      prisma.user.create.mockResolvedValue({ id: 'user-1', email: 'new@example.com' });
+
+      const tokens = await service.findOrCreateGoogleUser({ googleId: 'google-1', email: 'new@example.com' });
+
+      expect(tokens).toEqual({ accessToken: 'signed-token', refreshToken: 'signed-token' });
+      const createArgs = prisma.user.create.mock.calls[0][0];
+      expect(createArgs.data).toEqual(
+        expect.objectContaining({ email: 'new@example.com', googleId: 'google-1', emailVerifiedAt: expect.any(Date) }),
+      );
+    });
+
+    it('links to an existing password-based account with the same email instead of making a duplicate', async () => {
+      prisma.user.findUnique.mockResolvedValueOnce(null); // no match by googleId yet
+      prisma.user.findUnique.mockResolvedValueOnce({
+        id: 'existing-user',
+        email: 'a@example.com',
+        emailVerifiedAt: null,
+      });
+      prisma.user.update.mockResolvedValueOnce({ id: 'existing-user', email: 'a@example.com' });
+
+      await service.findOrCreateGoogleUser({ googleId: 'google-2', email: 'a@example.com' });
+
+      expect(prisma.user.create).not.toHaveBeenCalled();
+      const linkArgs = prisma.user.update.mock.calls[0][0];
+      expect(linkArgs.where).toEqual({ id: 'existing-user' });
+      expect(linkArgs.data.googleId).toBe('google-2');
+      // Was never verified by email — Google's own OAuth consent screen
+      // just verified ownership of this address, so this account becomes
+      // verified too, instead of staying permanently locked out.
+      expect(linkArgs.data.emailVerifiedAt).toBeInstanceOf(Date);
+    });
+
+    it('reuses the existing account on repeat Google sign-ins, without creating or re-linking anything', async () => {
+      prisma.user.findUnique.mockResolvedValueOnce({ id: 'user-1', email: 'a@example.com' });
+
+      await service.findOrCreateGoogleUser({ googleId: 'google-1', email: 'a@example.com' });
+
+      expect(prisma.user.create).not.toHaveBeenCalled();
+      expect(prisma.user.findUnique).toHaveBeenCalledTimes(1);
+      // update() is still called once here — to store the new hashed
+      // refresh token, same as any other login, not to re-link anything.
+      expect(prisma.user.update).toHaveBeenCalledTimes(1);
+      expect(prisma.user.update.mock.calls[0][0].data).toHaveProperty('hashedRefreshToken');
+    });
+  });
+
+  describe('issueOAuthCode / exchangeOAuthCode', () => {
+    it('round-trips a token pair through a one-time code', async () => {
+      const tokens = { accessToken: 'at', refreshToken: 'rt' };
+
+      const code = await service.issueOAuthCode(tokens);
+      const result = await service.exchangeOAuthCode(code);
+
+      expect(result).toEqual(tokens);
+      expect(redis.client.set).toHaveBeenCalledWith(expect.stringContaining(code), JSON.stringify(tokens), 'EX', 60);
+    });
+
+    it('can only be exchanged once — the code is deleted on first use', async () => {
+      const code = await service.issueOAuthCode({ accessToken: 'at', refreshToken: 'rt' });
+
+      await service.exchangeOAuthCode(code);
+
+      await expect(service.exchangeOAuthCode(code)).rejects.toThrow(BadRequestException);
+    });
+
+    it('rejects an unknown or already-expired code', async () => {
+      await expect(service.exchangeOAuthCode('never-issued')).rejects.toThrow(BadRequestException);
     });
   });
 });

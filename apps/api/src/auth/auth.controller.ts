@@ -1,13 +1,17 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
+import { OAuthExchangeDto } from './dto/oauth-exchange.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { JwtPayloadWithRefreshToken } from './types/jwt-payload.type';
+import { GoogleProfile } from './strategies/google.strategy';
 
 @Controller('auth')
 export class AuthController {
@@ -48,5 +52,25 @@ export class AuthController {
   @Post('logout')
   logout(@CurrentUser() user: JwtPayloadWithRefreshToken) {
     return this.authService.logout(user.sub);
+  }
+
+  // Passport's GoogleStrategy intercepts the request before this body runs
+  // — it only ever exists to trigger the redirect to Google's consent screen.
+  @UseGuards(GoogleAuthGuard)
+  @Get('google')
+  googleLogin() {}
+
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/callback')
+  async googleCallback(@Req() req: { user: GoogleProfile }, @Res() res: Response) {
+    const tokens = await this.authService.findOrCreateGoogleUser(req.user);
+    const code = await this.authService.issueOAuthCode(tokens);
+    res.redirect(`${process.env.WEB_APP_URL}/api/auth/oauth-callback?code=${code}`);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('oauth-exchange')
+  oauthExchange(@Body() dto: OAuthExchangeDto) {
+    return this.authService.exchangeOAuthCode(dto.code);
   }
 }

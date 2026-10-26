@@ -12,7 +12,9 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    searchParams.get("error") === "oauth_failed" ? t("oauthFailed") : null,
+  );
   const [needsVerification, setNeedsVerification] = useState(false);
   const [resendStatus, setResendStatus] = useState<"idle" | "sending" | "sent">("idle");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -105,6 +107,19 @@ export default function LoginPage() {
           {isSubmitting ? t("submitting") : t("submit")}
         </button>
       </form>
+      <div className="my-4 flex items-center gap-3 text-base text-gray-500">
+        <span className="h-px flex-1 bg-gray-200" />
+        {t("orContinueWith")}
+        <span className="h-px flex-1 bg-gray-200" />
+      </div>
+      {/* Plain navigation, not a fetch — this has to leave our origin so the
+          browser lands on Google's own consent screen. */}
+      <a
+        href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google`}
+        className="rounded border border-gray-300 px-4 py-2 text-center"
+      >
+        {t("googleButton")}
+      </a>
       <p className="mt-4 text-base text-gray-600">
         {t("noAccount")}{" "}
         <Link href="/register" className="underline">

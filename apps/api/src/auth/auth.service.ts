@@ -10,12 +10,19 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { randomBytes, createHash } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
 import { MailService } from '../mail/mail.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
-import { SALT_ROUNDS, VERIFICATION_TOKEN_TTL_HOURS } from './auth.constants';
+import { GoogleProfile } from './strategies/google.strategy';
+import {
+  OAUTH_CODE_PREFIX,
+  OAUTH_CODE_TTL_SECONDS,
+  SALT_ROUNDS,
+  VERIFICATION_TOKEN_TTL_HOURS,
+} from './auth.constants';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +32,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly redis: RedisService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -56,7 +64,10 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
-    if (!user) {
+    // Same error for "no such user" and "this account has no password"
+    // (e.g. it was created via Google sign-in) — otherwise the response
+    // would leak which emails exist and how they registered.
+    if (!user || !user.passwordHash) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -146,6 +157,54 @@ export class AuthService {
     // succeeds against the same unchanged hash, no ordering dependency.
     const accessToken = await this.signAccessToken(user.id, user.email);
     return { accessToken, refreshToken };
+  }
+
+  /**
+   * Called from the Google OAuth callback. Links to an existing account by
+   * email when one exists — Google has already verified ownership of that
+   * email (that's what the consent screen just did), so linking is safe
+   * and lets someone who registered with a password also sign in with
+   * Google later, or vice versa.
+   */
+  async findOrCreateGoogleUser(profile: GoogleProfile) {
+    let user = await this.prisma.user.findUnique({ where: { googleId: profile.googleId } });
+
+    if (!user) {
+      const existingByEmail = await this.prisma.user.findUnique({ where: { email: profile.email } });
+      user = existingByEmail
+        ? await this.prisma.user.update({
+            where: { id: existingByEmail.id },
+            data: { googleId: profile.googleId, emailVerifiedAt: existingByEmail.emailVerifiedAt ?? new Date() },
+          })
+        : await this.prisma.user.create({
+            data: { email: profile.email, googleId: profile.googleId, emailVerifiedAt: new Date() },
+          });
+    }
+
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRefreshTokenHash(user.id, tokens.refreshToken);
+    return tokens;
+  }
+
+  /**
+   * Stashes a token pair behind a short-lived, single-use random code
+   * instead of putting the tokens themselves in the OAuth redirect URL
+   * (which browsers keep in history and servers tend to log).
+   */
+  async issueOAuthCode(tokens: { accessToken: string; refreshToken: string }): Promise<string> {
+    const code = randomBytes(32).toString('hex');
+    await this.redis.client.set(`${OAUTH_CODE_PREFIX}${code}`, JSON.stringify(tokens), 'EX', OAUTH_CODE_TTL_SECONDS);
+    return code;
+  }
+
+  async exchangeOAuthCode(code: string): Promise<{ accessToken: string; refreshToken: string }> {
+    const key = `${OAUTH_CODE_PREFIX}${code}`;
+    const raw = await this.redis.client.get(key);
+    if (!raw) {
+      throw new BadRequestException('This sign-in link has expired or was already used');
+    }
+    await this.redis.client.del(key);
+    return JSON.parse(raw) as { accessToken: string; refreshToken: string };
   }
 
   private generateVerificationToken() {
