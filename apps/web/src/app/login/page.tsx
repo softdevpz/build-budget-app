@@ -18,6 +18,11 @@ export default function LoginPage() {
   const [needsVerification, setNeedsVerification] = useState(false);
   const [resendStatus, setResendStatus] = useState<"idle" | "sending" | "sent">("idle");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Set directly from the URL when Google's own callback found the account
+  // has 2FA enabled (see AuthController.googleCallback) — skips straight to
+  // the code prompt below, no password step needed a second time.
+  const [challengeId, setChallengeId] = useState<string | null>(searchParams.get("twoFactorChallenge"));
+  const [twoFactorCode, setTwoFactorCode] = useState("");
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -44,6 +49,37 @@ export default function LoginPage() {
       return;
     }
 
+    const data = await res.json();
+    if (data.twoFactorRequired) {
+      // Password was correct, but the account has 2FA — one more step
+      // before a session actually gets granted (see /api/auth/2fa-verify).
+      setChallengeId(data.challengeId);
+      return;
+    }
+
+    router.push(searchParams.get("from") ?? "/dashboard");
+    router.refresh();
+  }
+
+  async function handleTwoFactorSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    const res = await fetch("/api/auth/2fa-verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ challengeId, code: twoFactorCode }),
+    });
+
+    setIsSubmitting(false);
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      setError(data?.message ?? t("twoFactorError"));
+      return;
+    }
+
     router.push(searchParams.get("from") ?? "/dashboard");
     router.refresh();
   }
@@ -56,6 +92,38 @@ export default function LoginPage() {
       body: JSON.stringify({ email }),
     });
     setResendStatus("sent");
+  }
+
+  if (challengeId) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
+        <h1 className="mb-2 text-2xl font-semibold">{t("twoFactorTitle")}</h1>
+        <p className="mb-6 text-base text-gray-600">{t("twoFactorSubtitle")}</p>
+        <form onSubmit={handleTwoFactorSubmit} className="flex flex-col gap-4">
+          <label className="flex flex-col gap-1">
+            <span className="text-base text-gray-700">{t("twoFactorCode")}</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              required
+              autoFocus
+              value={twoFactorCode}
+              onChange={(e) => setTwoFactorCode(e.target.value)}
+              className="rounded border border-gray-300 px-3 py-2"
+            />
+          </label>
+          {error && <p className="text-base text-red-600">{error}</p>}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="rounded bg-gray-900 px-4 py-2 text-white disabled:opacity-50"
+          >
+            {isSubmitting ? t("submitting") : t("twoFactorSubmit")}
+          </button>
+        </form>
+      </main>
+    );
   }
 
   return (

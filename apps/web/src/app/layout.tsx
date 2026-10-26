@@ -38,6 +38,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <Link href="/billing" className="text-base underline">
                     {t("billing")}
                   </Link>
+                  <Link href="/account" className="text-base underline">
+                    {t("account")}
+                  </Link>
                   <LogoutButton />
                 </>
               ) : (

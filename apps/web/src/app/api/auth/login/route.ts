@@ -6,10 +6,17 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
 
   try {
-    const data = (await callNestApiOrThrow("/auth/login", { method: "POST", body })) as {
-      accessToken: string;
-      refreshToken: string;
-    };
+    const data = (await callNestApiOrThrow("/auth/login", { method: "POST", body })) as
+      | { accessToken: string; refreshToken: string }
+      | { twoFactorRequired: true; challengeId: string };
+
+    if ("twoFactorRequired" in data) {
+      // No cookies yet — the password check passed, but the account still
+      // needs a valid TOTP/backup code (see /api/auth/2fa-verify) before a
+      // session is actually granted.
+      return NextResponse.json({ twoFactorRequired: true, challengeId: data.challengeId });
+    }
+
     await setAuthCookies(data.accessToken, data.refreshToken);
     return NextResponse.json({ ok: true });
   } catch (err) {

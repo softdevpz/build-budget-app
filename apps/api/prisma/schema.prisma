@@ -18,6 +18,9 @@ model User {
   emailVerificationExpiresAt DateTime?
   plan                String   @default("free")
   stripeCustomerId    String?
+  twoFactorEnabled    Boolean  @default(false)
+  twoFactorSecret     String?
+  twoFactorBackupCodes String[] @default([])
   createdAt           DateTime @default(now())
 
   projects            Project[]

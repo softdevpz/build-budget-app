@@ -9,6 +9,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { randomBytes, createHash } from 'crypto';
+import { authenticator } from 'otplib';
+import { toDataURL } from 'qrcode';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { MailService } from '../mail/mail.service';
@@ -18,11 +20,16 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { GoogleProfile } from './strategies/google.strategy';
 import {
+  BACKUP_CODES_COUNT,
   OAUTH_CODE_PREFIX,
   OAUTH_CODE_TTL_SECONDS,
   SALT_ROUNDS,
+  TOTP_ISSUER,
+  TWO_FACTOR_CHALLENGE_PREFIX,
+  TWO_FACTOR_CHALLENGE_TTL_SECONDS,
   VERIFICATION_TOKEN_TTL_HOURS,
 } from './auth.constants';
+import type { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -81,6 +88,16 @@ export class AuthService {
       // just isn't allowed to log in yet. Conflating the two would make
       // "please verify your email" indistinguishable from a wrong password.
       throw new ForbiddenException('Please verify your email before logging in');
+    }
+
+    if (user.twoFactorEnabled) {
+      // Password alone isn't enough to finish logging in — hand back a
+      // challenge id instead of tokens. It proves the password check already
+      // passed, but (unlike a real token) grants no API access on its own;
+      // only a valid TOTP/backup code redeemed via verifyTwoFactorChallenge
+      // actually issues a session.
+      const challengeId = await this.createTwoFactorChallenge(user.id);
+      return { twoFactorRequired: true as const, challengeId };
     }
 
     const tokens = await this.getTokens(user.id, user.email);
@@ -181,6 +198,15 @@ export class AuthService {
           });
     }
 
+    if (user.twoFactorEnabled) {
+      // Same as password login: Google proved who the user is, but not
+      // that they also hold the second factor — hand back a challenge
+      // instead of a session. Without this, enabling 2FA would do nothing
+      // for an account that also has Google sign-in linked.
+      const challengeId = await this.createTwoFactorChallenge(user.id);
+      return { twoFactorRequired: true as const, challengeId };
+    }
+
     const tokens = await this.getTokens(user.id, user.email);
     await this.updateRefreshTokenHash(user.id, tokens.refreshToken);
     return tokens;
@@ -205,6 +231,123 @@ export class AuthService {
     }
     await this.redis.client.del(key);
     return JSON.parse(raw) as { accessToken: string; refreshToken: string };
+  }
+
+  async getTwoFactorStatus(userId: string): Promise<{ enabled: boolean }> {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    return { enabled: user.twoFactorEnabled };
+  }
+
+  /**
+   * Generates a new secret and stores it unconfirmed — twoFactorEnabled
+   * stays false until enableTwoFactor proves the user's authenticator app
+   * actually produces matching codes for it. Calling this again before
+   * confirming just overwrites the previous (never-activated) secret.
+   */
+  async setupTwoFactor(userId: string): Promise<{ secret: string; qrCodeDataUrl: string }> {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    const secret = authenticator.generateSecret();
+    await this.prisma.user.update({ where: { id: userId }, data: { twoFactorSecret: secret } });
+
+    const otpauthUrl = authenticator.keyuri(user.email, TOTP_ISSUER, secret);
+    const qrCodeDataUrl = await toDataURL(otpauthUrl);
+    return { secret, qrCodeDataUrl };
+  }
+
+  /** Confirms setupTwoFactor with a real code from the app, then turns 2FA on. */
+  async enableTwoFactor(userId: string, code: string): Promise<{ backupCodes: string[] }> {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    if (!user.twoFactorSecret) {
+      throw new BadRequestException('Call /auth/2fa/setup first');
+    }
+    if (!authenticator.verify({ token: code, secret: user.twoFactorSecret })) {
+      throw new BadRequestException('Invalid code');
+    }
+
+    const { plainCodes, hashedCodes } = this.generateBackupCodes();
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorEnabled: true, twoFactorBackupCodes: hashedCodes },
+    });
+    // Shown exactly once — only the hashes are kept from here on, the same
+    // way a password only ever exists in plain text in the request body.
+    return { backupCodes: plainCodes };
+  }
+
+  /**
+   * Requires a valid code (TOTP or backup), not just an authenticated
+   * request — otherwise a hijacked access token could silently turn off the
+   * account's second factor.
+   */
+  async disableTwoFactor(userId: string, code: string): Promise<void> {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    if (!user.twoFactorEnabled) {
+      throw new BadRequestException('Two-factor authentication is not enabled');
+    }
+    if (!(await this.verifyAndConsumeCode(user, code))) {
+      throw new BadRequestException('Invalid code');
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorEnabled: false, twoFactorSecret: null, twoFactorBackupCodes: [] },
+    });
+  }
+
+  async verifyTwoFactorChallenge(
+    challengeId: string,
+    code: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const key = `${TWO_FACTOR_CHALLENGE_PREFIX}${challengeId}`;
+    const userId = await this.redis.client.get(key);
+    if (!userId) {
+      throw new BadRequestException('This login attempt has expired — please log in again');
+    }
+
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    if (!(await this.verifyAndConsumeCode(user, code))) {
+      throw new BadRequestException('Invalid code');
+    }
+    await this.redis.client.del(key); // one-time use, same as the OAuth code
+
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRefreshTokenHash(user.id, tokens.refreshToken);
+    return tokens;
+  }
+
+  private async createTwoFactorChallenge(userId: string): Promise<string> {
+    const challengeId = randomBytes(32).toString('hex');
+    await this.redis.client.set(
+      `${TWO_FACTOR_CHALLENGE_PREFIX}${challengeId}`,
+      userId,
+      'EX',
+      TWO_FACTOR_CHALLENGE_TTL_SECONDS,
+    );
+    return challengeId;
+  }
+
+  /** Tries the code as a live TOTP first, then as a backup code (consuming it on match). */
+  private async verifyAndConsumeCode(user: User, code: string): Promise<boolean> {
+    if (user.twoFactorSecret && authenticator.verify({ token: code, secret: user.twoFactorSecret })) {
+      return true;
+    }
+
+    const codeHash = this.hashToken(code);
+    if (!user.twoFactorBackupCodes.includes(codeHash)) {
+      return false;
+    }
+    // Backup codes are one-time use — remove the matched one so it can't be
+    // replayed, even though the account's own 2FA state is unaffected here.
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { twoFactorBackupCodes: user.twoFactorBackupCodes.filter((c) => c !== codeHash) },
+    });
+    return true;
+  }
+
+  private generateBackupCodes(): { plainCodes: string[]; hashedCodes: string[] } {
+    const plainCodes = Array.from({ length: BACKUP_CODES_COUNT }, () => randomBytes(5).toString('hex'));
+    return { plainCodes, hashedCodes: plainCodes.map((c) => this.hashToken(c)) };
   }
 
   private generateVerificationToken() {

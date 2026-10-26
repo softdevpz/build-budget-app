@@ -6,6 +6,7 @@
     "brand": "Budżet budowy",
     "dashboard": "Pulpit",
     "billing": "Plan",
+    "account": "Konto",
     "benchmark": "Benchmark",
     "login": "Zaloguj się",
     "register": "Załóż konto",
@@ -32,7 +33,12 @@
     "resend": "Wyślij link ponownie",
     "resending": "Wysyłanie...",
     "noAccount": "Nie masz konta?",
-    "registerLink": "Zarejestruj się"
+    "registerLink": "Zarejestruj się",
+    "twoFactorTitle": "Weryfikacja dwuetapowa",
+    "twoFactorSubtitle": "Wpisz 6-cyfrowy kod z aplikacji uwierzytelniającej (albo jeden z zapasowych kodów).",
+    "twoFactorCode": "Kod",
+    "twoFactorSubmit": "Potwierdź",
+    "twoFactorError": "Nieprawidłowy kod"
   },
   "register": {
     "title": "Załóż konto",
@@ -219,6 +225,29 @@
     "stage": "Etap",
     "avgCost": "Śr. koszt/m²",
     "samples": "Próbki"
+  },
+  "account": {
+    "title": "Konto",
+    "genericError": "Coś poszło nie tak",
+    "verifying": "Weryfikacja...",
+    "confirm": "Potwierdź",
+    "cancel": "Anuluj",
+    "codeLabel": "Kod z aplikacji",
+    "twoFactorTitle": "Weryfikacja dwuetapowa (2FA)",
+    "statusEnabled": "Włączona — logowanie wymaga dodatkowo kodu z aplikacji uwierzytelniającej.",
+    "statusDisabled": "Wyłączona. Włącz, żeby dodać dodatkową warstwę zabezpieczeń przy logowaniu.",
+    "enableButton": "Włącz 2FA",
+    "disableButton": "Wyłącz 2FA",
+    "setupTitle": "Zeskanuj kod QR",
+    "setupBody": "Zeskanuj ten kod aplikacją uwierzytelniającą (np. Google Authenticator, Authy), albo wpisz klucz ręcznie — potem wpisz wygenerowany 6-cyfrowy kod, żeby potwierdzić.",
+    "qrCodeAlt": "Kod QR do zeskanowania aplikacją uwierzytelniającą",
+    "manualEntry": "Klucz do ręcznego wpisania",
+    "backupCodesTitle": "Zapisz kody zapasowe",
+    "backupCodesBody": "To jedyny moment, kiedy je zobaczysz. Zapisz je w bezpiecznym miejscu — każdego możesz użyć raz, zamiast kodu z aplikacji, jeśli stracisz dostęp do telefonu.",
+    "backupCodesConfirm": "Zapisałem te kody",
+    "disableTitle": "Wyłącz weryfikację dwuetapową",
+    "disableBody": "Wpisz aktualny kod z aplikacji (albo jeden z kodów zapasowych), żeby potwierdzić wyłączenie.",
+    "disableConfirm": "Wyłącz"
   },
   "privacy": {
     "title": "Polityka prywatności",

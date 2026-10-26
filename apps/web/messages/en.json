@@ -6,6 +6,7 @@
     "brand": "Build Budget",
     "dashboard": "Dashboard",
     "billing": "Plan",
+    "account": "Account",
     "benchmark": "Benchmark",
     "login": "Log in",
     "register": "Sign up",
@@ -32,7 +33,12 @@
     "resend": "Resend link",
     "resending": "Sending...",
     "noAccount": "Don't have an account?",
-    "registerLink": "Sign up"
+    "registerLink": "Sign up",
+    "twoFactorTitle": "Two-factor verification",
+    "twoFactorSubtitle": "Enter the 6-digit code from your authenticator app (or one of your backup codes).",
+    "twoFactorCode": "Code",
+    "twoFactorSubmit": "Verify",
+    "twoFactorError": "Invalid code"
   },
   "register": {
     "title": "Create an account",
@@ -219,6 +225,29 @@
     "stage": "Stage",
     "avgCost": "Avg. cost/m²",
     "samples": "Samples"
+  },
+  "account": {
+    "title": "Account",
+    "genericError": "Something went wrong",
+    "verifying": "Verifying...",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "codeLabel": "Code from the app",
+    "twoFactorTitle": "Two-factor authentication (2FA)",
+    "statusEnabled": "Enabled — logging in also requires a code from your authenticator app.",
+    "statusDisabled": "Disabled. Turn it on to add an extra layer of security to your login.",
+    "enableButton": "Enable 2FA",
+    "disableButton": "Disable 2FA",
+    "setupTitle": "Scan the QR code",
+    "setupBody": "Scan this with an authenticator app (e.g. Google Authenticator, Authy), or type the key in manually — then enter the generated 6-digit code to confirm.",
+    "qrCodeAlt": "QR code to scan with an authenticator app",
+    "manualEntry": "Manual entry key",
+    "backupCodesTitle": "Save your backup codes",
+    "backupCodesBody": "This is the only time you'll see these. Save them somewhere safe — each can be used once instead of an app code if you lose access to your phone.",
+    "backupCodesConfirm": "I've saved these codes",
+    "disableTitle": "Turn off two-factor authentication",
+    "disableBody": "Enter a current code from your app (or one of your backup codes) to confirm turning it off.",
+    "disableConfirm": "Disable"
   },
   "privacy": {
     "title": "Privacy Policy",
