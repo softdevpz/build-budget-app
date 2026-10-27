@@ -166,7 +166,7 @@ export function ProjectWorkspace({
       </div>
       {actionError && <p className="mb-4 text-base text-danger">{actionError}</p>}
 
-      <div className="mb-8 grid grid-cols-3 gap-4">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <SummaryCard label={t("summaryTargetBudget")} value={summary.targetBudget} />
         <SummaryCard label={t("summarySpent")} value={summary.totalSpent} />
         <SummaryCard label={t("summaryRemaining")} value={summary.remaining} />

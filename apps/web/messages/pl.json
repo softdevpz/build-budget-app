@@ -167,7 +167,9 @@
     "genericDownloadError": "Nie udało się pobrać raportu",
     "statusPending": "Generowanie...",
     "statusCompleted": "Gotowy",
-    "statusFailed": "Błąd"
+    "statusFailed": "Błąd",
+    "confirmDelete": "Usunąć ten raport?",
+    "genericDeleteError": "Nie udało się usunąć raportu"
   },
   "members": {
     "title": "Współpracownicy",

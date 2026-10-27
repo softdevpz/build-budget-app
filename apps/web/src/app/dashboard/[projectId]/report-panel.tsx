@@ -10,6 +10,7 @@ const POLL_INTERVAL_MS = 3000;
 
 export function ReportPanel({ projectId, initialReports }: { projectId: string; initialReports: Report[] }) {
   const t = useTranslations("reports");
+  const tc = useTranslations("common");
   const statusLabels: Record<ReportStatus, string> = {
     pending: t("statusPending"),
     completed: t("statusCompleted"),
@@ -50,6 +51,16 @@ export function ReportPanel({ projectId, initialReports }: { projectId: string; 
     onError: (err) => setError(err instanceof ClientApiError ? err.message : t("genericDownloadError")),
   });
 
+  const deleteReport = useMutation({
+    mutationFn: (reportId: string) =>
+      apiFetch<void>(`/projects/${projectId}/reports/${reportId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      setError(null);
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (err) => setError(err instanceof ClientApiError ? err.message : t("genericDeleteError")),
+  });
+
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
@@ -70,7 +81,7 @@ export function ReportPanel({ projectId, initialReports }: { projectId: string; 
           {reports.map((report) => (
             <li
               key={report.id}
-              className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line px-3 py-2"
             >
               <div>
                 <p className="font-medium">{new Date(report.requestedAt).toLocaleString("pl-PL")}</p>
@@ -78,17 +89,28 @@ export function ReportPanel({ projectId, initialReports }: { projectId: string; 
                   <p className="text-base text-danger">{report.error}</p>
                 )}
               </div>
-              {report.status === "completed" ? (
+              <div className="flex items-center gap-3">
+                {report.status === "completed" ? (
+                  <button
+                    onClick={() => downloadReport.mutate(report.id)}
+                    disabled={downloadReport.isPending}
+                    className="text-base text-accent underline disabled:opacity-50"
+                  >
+                    {t("download")}
+                  </button>
+                ) : (
+                  <span className="text-base text-muted">{statusLabels[report.status]}</span>
+                )}
                 <button
-                  onClick={() => downloadReport.mutate(report.id)}
-                  disabled={downloadReport.isPending}
-                  className="text-base text-accent underline disabled:opacity-50"
+                  onClick={() => {
+                    if (confirm(t("confirmDelete"))) deleteReport.mutate(report.id);
+                  }}
+                  disabled={deleteReport.isPending}
+                  className="text-base text-danger underline disabled:opacity-50"
                 >
-                  {t("download")}
+                  {tc("delete")}
                 </button>
-              ) : (
-                <span className="text-base text-muted">{statusLabels[report.status]}</span>
-              )}
+              </div>
             </li>
           ))}
         </ul>

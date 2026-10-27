@@ -114,7 +114,7 @@ export function DocumentPanel({
               {documents.map((document) => (
                 <li
                   key={document.id}
-                  className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line px-3 py-2"
                 >
                   <div>
                     <a

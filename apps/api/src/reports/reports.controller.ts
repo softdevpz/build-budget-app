@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/types/jwt-payload.type';
@@ -27,5 +27,15 @@ export class ReportsController {
     @Param('reportId') reportId: string,
   ) {
     return this.reportsService.findOne(user.sub, projectId, reportId);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':reportId')
+  remove(
+    @CurrentUser() user: JwtPayload,
+    @Param('projectId') projectId: string,
+    @Param('reportId') reportId: string,
+  ) {
+    return this.reportsService.remove(user.sub, projectId, reportId);
   }
 }

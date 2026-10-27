@@ -33,14 +33,27 @@ export class ReportsService {
   }
 
   async findOne(userId: string, projectId: string, reportId: string) {
+    const report = await this.findOwned(userId, projectId, reportId);
+    if (report.status === 'completed' && report.fileUrl) {
+      const downloadUrl = await this.s3Service.getDownloadUrl(report.fileUrl);
+      return { ...report, downloadUrl };
+    }
+    return report;
+  }
+
+  async remove(userId: string, projectId: string, reportId: string) {
+    const report = await this.findOwned(userId, projectId, reportId);
+    if (report.fileUrl) {
+      await this.s3Service.deleteObject(report.fileUrl);
+    }
+    await this.prisma.report.delete({ where: { id: reportId } });
+  }
+
+  private async findOwned(userId: string, projectId: string, reportId: string) {
     await this.projectsService.findOwned(userId, projectId);
     const report = await this.prisma.report.findUnique({ where: { id: reportId } });
     if (!report || report.projectId !== projectId) {
       throw new NotFoundException('Report not found');
-    }
-    if (report.status === 'completed' && report.fileUrl) {
-      const downloadUrl = await this.s3Service.getDownloadUrl(report.fileUrl);
-      return { ...report, downloadUrl };
     }
     return report;
   }

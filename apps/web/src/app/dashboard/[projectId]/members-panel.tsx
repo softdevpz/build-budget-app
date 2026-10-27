@@ -66,7 +66,7 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
             {members.map((member) => (
               <li
                 key={member.id}
-                className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line px-3 py-2"
               >
                 <div>
                   <p className="font-medium">{member.user.email}</p>

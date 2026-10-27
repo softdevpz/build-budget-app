@@ -50,11 +50,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="font-sans">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <header className="flex items-center justify-between border-b border-line px-4 py-3">
+          <header className="flex flex-col gap-y-2 border-b border-line px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <Link href="/" className="font-semibold">
               {t("brand")}
             </Link>
-            <nav className="flex items-center gap-4">
+            <nav className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <Link href="/benchmark" className="text-base underline">
                 {t("benchmark")}
               </Link>
