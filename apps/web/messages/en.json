@@ -167,7 +167,9 @@
     "genericDownloadError": "Failed to download report",
     "statusPending": "Generating...",
     "statusCompleted": "Ready",
-    "statusFailed": "Failed"
+    "statusFailed": "Failed",
+    "confirmDelete": "Delete this report?",
+    "genericDeleteError": "Failed to delete report"
   },
   "members": {
     "title": "Collaborators",

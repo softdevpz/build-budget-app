@@ -51,26 +51,30 @@ export function BenchmarkTable({ stats }: { stats: BenchmarkStat[] }) {
       {filtered.length === 0 ? (
         <p className="text-base text-muted">{t("noResults")}</p>
       ) : (
-        <table className="w-full text-left text-base">
-          <thead>
-            <tr className="border-b border-line text-base uppercase tracking-wide text-muted">
-              <th className="py-2">{t("region")}</th>
-              <th className="py-2">{t("stage")}</th>
-              <th className="py-2">{t("avgCost")}</th>
-              <th className="py-2">{t("samples")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((stat) => (
-              <tr key={`${stat.region}-${stat.stageCategory}`} className="border-b border-line">
-                <td className="py-2">{stat.region}</td>
-                <td className="py-2 capitalize">{stat.stageCategory}</td>
-                <td className="py-2">{stat.avgCostPerM2.toLocaleString("pl-PL", { maximumFractionDigits: 0 })} PLN</td>
-                <td className="py-2 text-muted">{stat.sampleSize}</td>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[480px] text-left text-base">
+            <thead>
+              <tr className="border-b border-line text-base uppercase tracking-wide text-muted">
+                <th className="py-2">{t("region")}</th>
+                <th className="py-2">{t("stage")}</th>
+                <th className="py-2">{t("avgCost")}</th>
+                <th className="py-2">{t("samples")}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map((stat) => (
+                <tr key={`${stat.region}-${stat.stageCategory}`} className="border-b border-line">
+                  <td className="py-2">{stat.region}</td>
+                  <td className="py-2 capitalize">{stat.stageCategory}</td>
+                  <td className="py-2">
+                    {stat.avgCostPerM2.toLocaleString("pl-PL", { maximumFractionDigits: 0 })} PLN
+                  </td>
+                  <td className="py-2 text-muted">{stat.sampleSize}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

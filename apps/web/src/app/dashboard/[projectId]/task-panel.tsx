@@ -97,7 +97,7 @@ export function TaskPanel({
               {tasks.map((task) => (
                 <li
                   key={task.id}
-                  className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line px-3 py-2"
                 >
                   <label className="flex items-center gap-2">
                     <input

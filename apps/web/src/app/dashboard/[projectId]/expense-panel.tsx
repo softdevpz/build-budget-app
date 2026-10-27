@@ -99,7 +99,7 @@ export function ExpensePanel({
               {expenses.map((expense) => (
                 <li
                   key={expense.id}
-                  className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line px-3 py-2"
                 >
                   <div>
                     <p className="font-medium">

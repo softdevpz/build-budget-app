@@ -117,7 +117,7 @@ export function StageWorkspace({
       </div>
       {statusError && <p className="mb-4 text-base text-danger">{statusError}</p>}
 
-      <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 flex flex-col gap-6">
         <div className="min-w-0 rounded-lg border border-line p-4">
           <ExpensePanel
             projectId={projectId}
