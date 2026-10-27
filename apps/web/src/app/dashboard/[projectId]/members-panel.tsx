@@ -4,6 +4,7 @@ import { useState, FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
+import { Collapsible } from "@/components/collapsible";
 import type { ProjectMember } from "@/lib/types";
 
 export function MembersPanel({ projectId, initialMembers }: { projectId: string; initialMembers: ProjectMember[] }) {
@@ -59,49 +60,55 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
   return (
     <section>
       <h2 className="mb-3 font-display text-xl font-semibold">{t("title")}</h2>
-      <ul className="mb-4 flex flex-col gap-2">
-        {members.map((member) => (
-          <li
-            key={member.id}
-            className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
-          >
-            <div>
-              <p className="font-medium">{member.user.email}</p>
-              <p className="text-base text-muted">{roleLabels[member.role]}</p>
-            </div>
-            {member.role !== "owner" && (
-              <button
-                onClick={() => {
-                  if (confirm(t("confirmRemove", { email: member.user.email }))) removeMember.mutate(member.id);
-                }}
-                className="text-base text-danger underline"
+      <div className="mb-4">
+        <Collapsible title={tc("listCount", { count: members.length })}>
+          <ul className="flex flex-col gap-2">
+            {members.map((member) => (
+              <li
+                key={member.id}
+                className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
               >
-                {tc("delete")}
-              </button>
-            )}
-          </li>
-        ))}
-      </ul>
+                <div>
+                  <p className="font-medium">{member.user.email}</p>
+                  <p className="text-base text-muted">{roleLabels[member.role]}</p>
+                </div>
+                {member.role !== "owner" && (
+                  <button
+                    onClick={() => {
+                      if (confirm(t("confirmRemove", { email: member.user.email }))) removeMember.mutate(member.id);
+                    }}
+                    className="text-base text-danger underline"
+                  >
+                    {tc("delete")}
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Collapsible>
+      </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1">
-          <span className="text-base text-muted">{t("emailLabel")}</span>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={inviteMember.isPending}
-          className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
-        >
-          {t("invite")}
-        </button>
-      </form>
-      <p className="mt-1 text-base text-muted">{t("hint")}</p>
+      <Collapsible title={t("invite")}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-base text-muted">{t("emailLabel")}</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={inviteMember.isPending}
+            className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
+          >
+            {t("invite")}
+          </button>
+        </form>
+        <p className="mt-1 text-base text-muted">{t("hint")}</p>
+      </Collapsible>
       {error && <p className="mt-2 text-base text-danger">{error}</p>}
     </section>
   );

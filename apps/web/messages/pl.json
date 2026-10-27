@@ -1,6 +1,7 @@
 {
   "common": {
-    "delete": "Usuń"
+    "delete": "Usuń",
+    "listCount": "Lista ({count})"
   },
   "nav": {
     "brand": "Budżet budowy",

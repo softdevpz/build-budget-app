@@ -4,6 +4,7 @@ import { useState, FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
+import { Collapsible } from "@/components/collapsible";
 import type { Stage, Task } from "@/lib/types";
 
 export function TaskPanel({
@@ -90,69 +91,80 @@ export function TaskPanel({
       {tasks.length === 0 ? (
         <p className="mb-4 text-base text-muted">{t("empty")}</p>
       ) : (
-        <ul className="mb-4 flex flex-col gap-2">
-          {tasks.map((task) => (
-            <li
-              key={task.id}
-              className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
-            >
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={task.done}
-                  onChange={(e) => toggleDone.mutate({ taskId: task.id, done: e.target.checked })}
-                />
-                <span>
-                  <p className={task.done ? "line-through text-muted" : "font-medium"}>{task.title}</p>
-                  {task.dueDate && (
-                    <p className={`text-base ${isOverdue(task) ? "text-danger" : "text-muted"}`}>
-                      {t("dueDateLabel", { date: new Date(task.dueDate).toLocaleDateString("pl-PL") })}
-                      {isOverdue(task) ? t("overdueSuffix") : ""}
-                    </p>
-                  )}
-                </span>
-              </label>
-              <button
-                onClick={() => {
-                  if (confirm(t("confirmDelete", { title: task.title }))) deleteTask.mutate(task.id);
-                }}
-                className="text-base text-danger underline"
-              >
-                {tc("delete")}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div className="mb-4">
+          <Collapsible title={tc("listCount", { count: tasks.length })}>
+            <ul className="flex flex-col gap-2">
+              {tasks.map((task) => (
+                <li
+                  key={task.id}
+                  className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
+                >
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={task.done}
+                      onChange={(e) => toggleDone.mutate({ taskId: task.id, done: e.target.checked })}
+                    />
+                    <span>
+                      <p className={task.done ? "line-through text-muted" : "font-medium"}>{task.title}</p>
+                      {task.dueDate && (
+                        <p className={`text-base ${isOverdue(task) ? "text-danger" : "text-muted"}`}>
+                          {t("dueDateLabel", { date: new Date(task.dueDate).toLocaleDateString("pl-PL") })}
+                          {isOverdue(task) ? t("overdueSuffix") : ""}
+                        </p>
+                      )}
+                    </span>
+                  </label>
+                  <button
+                    onClick={() => {
+                      if (confirm(t("confirmDelete", { title: task.title }))) deleteTask.mutate(task.id);
+                    }}
+                    className="text-base text-danger underline"
+                  >
+                    {tc("delete")}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </Collapsible>
+        </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1">
-          <span className="text-base text-muted">{t("nameLabel")}</span>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-base text-muted">{t("dueDate")}</span>
-          <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={inputClass} />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-base text-muted">{t("stage")}</span>
-          <select value={stageId} onChange={(e) => setStageId(e.target.value)} className={inputClass}>
-            <option value="">{t("noStage")}</option>
-            {stages.map((stage) => (
-              <option key={stage.id} value={stage.id}>
-                {stage.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          type="submit"
-          disabled={createTask.isPending}
-          className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
-        >
-          {t("add")}
-        </button>
-      </form>
+      <Collapsible title={t("add")}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-base text-muted">{t("nameLabel")}</span>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-base text-muted">{t("dueDate")}</span>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className={inputClass}
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-base text-muted">{t("stage")}</span>
+            <select value={stageId} onChange={(e) => setStageId(e.target.value)} className={inputClass}>
+              <option value="">{t("noStage")}</option>
+              {stages.map((stage) => (
+                <option key={stage.id} value={stage.id}>
+                  {stage.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="submit"
+            disabled={createTask.isPending}
+            className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
+          >
+            {t("add")}
+          </button>
+        </form>
+      </Collapsible>
       {error && <p className="mt-2 text-base text-danger">{error}</p>}
     </section>
   );
