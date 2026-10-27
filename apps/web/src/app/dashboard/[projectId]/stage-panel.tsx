@@ -77,9 +77,9 @@ export function StagePanel({
 
   return (
     <section>
-      <h2 className="mb-3 text-xl font-semibold">{t("title")}</h2>
+      <h2 className="mb-3 font-display text-xl font-semibold">{t("title")}</h2>
       {stages.length === 0 ? (
-        <p className="mb-4 text-base text-gray-600">{t("empty")}</p>
+        <p className="mb-4 text-base text-muted">{t("empty")}</p>
       ) : (
         <ul className="mb-4 flex flex-col gap-2">
           {stages.map((stage) => {
@@ -87,19 +87,19 @@ export function StagePanel({
             return (
             <li
               key={stage.id}
-              className="flex items-center justify-between rounded border border-gray-200 px-3 py-2"
+              className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
             >
               <div>
-                <Link href={`/dashboard/${projectId}/stages/${stage.id}`} className="font-medium underline">
+                <Link href={`/dashboard/${projectId}/stages/${stage.id}`} className="font-medium text-accent underline">
                   {stage.name}
                 </Link>
                 {stage.plannedBudget && (
-                  <p className="text-base text-gray-600">
+                  <p className="text-base text-muted">
                     {t("planned", { amount: Number(stage.plannedBudget).toLocaleString("pl-PL") })}
                   </p>
                 )}
                 {warning && (
-                  <p className={`text-base ${warning.isOver ? "text-red-600" : "text-amber-600"}`}>
+                  <p className={`text-base ${warning.isOver ? "text-danger" : "text-amber-600"}`}>
                     {warning.message}
                   </p>
                 )}
@@ -110,7 +110,7 @@ export function StagePanel({
                   onChange={(e) =>
                     updateStatus.mutate({ stageId: stage.id, status: e.target.value as StageStatus })
                   }
-                  className="rounded border border-gray-300 px-3 py-2 text-base"
+                  className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
                 >
                   {Object.entries(statusLabels).map(([value, label]) => (
                     <option key={value} value={value}>
@@ -122,7 +122,7 @@ export function StagePanel({
                   onClick={() => {
                     if (confirm(t("confirmDelete", { name: stage.name }))) deleteStage.mutate(stage.id);
                   }}
-                  className="text-base text-red-600 underline"
+                  className="text-base text-danger underline"
                 >
                   {tc("delete")}
                 </button>
@@ -135,33 +135,33 @@ export function StagePanel({
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("namePlaceholder")}</span>
+          <span className="text-base text-muted">{t("namePlaceholder")}</span>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2 text-base"
+            className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("plannedBudgetPlaceholder")}</span>
+          <span className="text-base text-muted">{t("plannedBudgetPlaceholder")}</span>
           <input
             type="number"
             min="0"
             step="0.01"
             value={plannedBudget}
             onChange={(e) => setPlannedBudget(e.target.value)}
-            className="w-32 rounded border border-gray-300 px-3 py-2 text-base"
+            className="w-32 rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
           />
         </label>
         <button
           type="submit"
           disabled={createStage.isPending}
-          className="rounded bg-gray-900 px-4 py-2 text-base text-white disabled:opacity-50"
+          className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
         >
           {t("add")}
         </button>
       </form>
-      {error && <p className="mt-2 text-base text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-base text-danger">{error}</p>}
     </section>
   );
 }

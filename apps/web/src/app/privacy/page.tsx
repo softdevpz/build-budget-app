@@ -8,33 +8,33 @@ export default async function PrivacyPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
-      <p className="mb-6 text-base text-gray-600">{t("intro")}</p>
+      <h1 className="mb-6 font-display text-2xl font-semibold">{t("title")}</h1>
+      <p className="mb-6 text-base text-muted">{t("intro")}</p>
 
-      <h2 className="mb-2 mt-6 text-xl font-semibold">{t("collectedTitle")}</h2>
-      <ul className="mb-6 list-disc pl-5 text-base text-gray-700">
+      <h2 className="mb-2 mt-6 font-display text-xl font-semibold">{t("collectedTitle")}</h2>
+      <ul className="mb-6 list-disc pl-5 text-base text-muted">
         <li>{t("collectedAccount")}</li>
         <li>{t("collectedGoogle")}</li>
         <li>{t("collectedContent")}</li>
       </ul>
 
-      <h2 className="mb-2 mt-6 text-xl font-semibold">{t("useTitle")}</h2>
-      <p className="mb-6 text-base text-gray-700">{t("useBody")}</p>
+      <h2 className="mb-2 mt-6 font-display text-xl font-semibold">{t("useTitle")}</h2>
+      <p className="mb-6 text-base text-muted">{t("useBody")}</p>
 
-      <h2 className="mb-2 mt-6 text-xl font-semibold">{t("sharingTitle")}</h2>
-      <ul className="mb-6 list-disc pl-5 text-base text-gray-700">
+      <h2 className="mb-2 mt-6 font-display text-xl font-semibold">{t("sharingTitle")}</h2>
+      <ul className="mb-6 list-disc pl-5 text-base text-muted">
         <li>{t("sharingStripe")}</li>
         <li>{t("sharingAws")}</li>
         <li>{t("sharingResend")}</li>
         <li>{t("sharingGoogle")}</li>
       </ul>
-      <p className="mb-6 text-base text-gray-700">{t("noSelling")}</p>
+      <p className="mb-6 text-base text-muted">{t("noSelling")}</p>
 
-      <h2 className="mb-2 mt-6 text-xl font-semibold">{t("rightsTitle")}</h2>
-      <p className="mb-6 text-base text-gray-700">{t("rightsBody")}</p>
+      <h2 className="mb-2 mt-6 font-display text-xl font-semibold">{t("rightsTitle")}</h2>
+      <p className="mb-6 text-base text-muted">{t("rightsBody")}</p>
 
-      <h2 className="mb-2 mt-6 text-xl font-semibold">{t("contactTitle")}</h2>
-      <p className="text-base text-gray-700">{t("contactBody")}</p>
+      <h2 className="mb-2 mt-6 font-display text-xl font-semibold">{t("contactTitle")}</h2>
+      <p className="text-base text-muted">{t("contactBody")}</p>
     </main>
   );
 }

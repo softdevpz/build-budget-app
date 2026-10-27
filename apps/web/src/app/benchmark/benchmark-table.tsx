@@ -25,7 +25,7 @@ export function BenchmarkTable({ stats }: { stats: BenchmarkStat[] }) {
         <select
           value={region}
           onChange={(e) => setRegion(e.target.value)}
-          className="rounded border border-gray-300 px-3 py-2 text-base"
+          className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
         >
           <option value="">{t("allRegions")}</option>
           {regions.map((r) => (
@@ -37,7 +37,7 @@ export function BenchmarkTable({ stats }: { stats: BenchmarkStat[] }) {
         <select
           value={stageCategory}
           onChange={(e) => setStageCategory(e.target.value)}
-          className="rounded border border-gray-300 px-3 py-2 text-base"
+          className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
         >
           <option value="">{t("allStages")}</option>
           {stageCategories.map((c) => (
@@ -49,11 +49,11 @@ export function BenchmarkTable({ stats }: { stats: BenchmarkStat[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-base text-gray-600">{t("noResults")}</p>
+        <p className="text-base text-muted">{t("noResults")}</p>
       ) : (
         <table className="w-full text-left text-base">
           <thead>
-            <tr className="border-b border-gray-200 text-base uppercase tracking-wide text-gray-600">
+            <tr className="border-b border-line text-base uppercase tracking-wide text-muted">
               <th className="py-2">{t("region")}</th>
               <th className="py-2">{t("stage")}</th>
               <th className="py-2">{t("avgCost")}</th>
@@ -62,11 +62,11 @@ export function BenchmarkTable({ stats }: { stats: BenchmarkStat[] }) {
           </thead>
           <tbody>
             {filtered.map((stat) => (
-              <tr key={`${stat.region}-${stat.stageCategory}`} className="border-b border-gray-100">
+              <tr key={`${stat.region}-${stat.stageCategory}`} className="border-b border-line">
                 <td className="py-2">{stat.region}</td>
                 <td className="py-2 capitalize">{stat.stageCategory}</td>
                 <td className="py-2">{stat.avgCostPerM2.toLocaleString("pl-PL", { maximumFractionDigits: 0 })} PLN</td>
-                <td className="py-2 text-gray-600">{stat.sampleSize}</td>
+                <td className="py-2 text-muted">{stat.sampleSize}</td>
               </tr>
             ))}
           </tbody>

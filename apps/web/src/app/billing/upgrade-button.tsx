@@ -26,11 +26,11 @@ export function UpgradeButton() {
       <button
         onClick={handleClick}
         disabled={isLoading}
-        className="rounded bg-gray-900 px-4 py-2 text-white disabled:opacity-50"
+        className="rounded-lg bg-accent-fill px-4 py-2 text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
       >
         {isLoading ? t("redirecting") : t("upgrade")}
       </button>
-      {error && <p className="mt-2 text-base text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-base text-danger">{error}</p>}
     </div>
   );
 }

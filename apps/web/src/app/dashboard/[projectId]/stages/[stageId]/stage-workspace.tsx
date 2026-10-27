@@ -87,26 +87,26 @@ export function StageWorkspace({
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-12">
-      <Link href={`/dashboard/${projectId}`} className="text-base underline">
+      <Link href={`/dashboard/${projectId}`} className="text-base text-accent underline">
         {t("backTo", { name: project.name })}
       </Link>
 
       <div className="mb-2 mt-4 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">{stage.name}</h1>
+          <h1 className="font-display text-2xl font-semibold">{stage.name}</h1>
           {stage.plannedBudget && (
-            <p className="text-base text-gray-600">
+            <p className="text-base text-muted">
               {t("planned", { amount: Number(stage.plannedBudget).toLocaleString("pl-PL") })}
             </p>
           )}
           {warning && (
-            <p className={`text-base ${warning.isOver ? "text-red-600" : "text-amber-600"}`}>{warning.message}</p>
+            <p className={`text-base ${warning.isOver ? "text-danger" : "text-amber-600"}`}>{warning.message}</p>
           )}
         </div>
         <select
           value={stage.status}
           onChange={(e) => updateStatus.mutate(e.target.value as StageStatus)}
-          className="rounded border border-gray-300 px-3 py-2 text-base"
+          className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
         >
           {Object.entries(statusLabels).map(([value, label]) => (
             <option key={value} value={value}>
@@ -115,10 +115,10 @@ export function StageWorkspace({
           ))}
         </select>
       </div>
-      {statusError && <p className="mb-4 text-base text-red-600">{statusError}</p>}
+      {statusError && <p className="mb-4 text-base text-danger">{statusError}</p>}
 
       <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="min-w-0 rounded border border-gray-200 p-4">
+        <div className="min-w-0 rounded-lg border border-line p-4">
           <ExpensePanel
             projectId={projectId}
             initialExpenses={initialExpenses}
@@ -126,7 +126,7 @@ export function StageWorkspace({
             stageFilter={stage.id}
           />
         </div>
-        <div className="min-w-0 rounded border border-gray-200 p-4">
+        <div className="min-w-0 rounded-lg border border-line p-4">
           <DocumentPanel
             projectId={projectId}
             initialDocuments={initialDocuments}
@@ -134,7 +134,7 @@ export function StageWorkspace({
             stageFilter={stage.id}
           />
         </div>
-        <div className="min-w-0 rounded border border-gray-200 p-4">
+        <div className="min-w-0 rounded-lg border border-line p-4">
           <DiaryPanel
             projectId={projectId}
             initialEntries={initialDiaryEntries}
@@ -142,7 +142,7 @@ export function StageWorkspace({
             stageFilter={stage.id}
           />
         </div>
-        <div className="min-w-0 rounded border border-gray-200 p-4">
+        <div className="min-w-0 rounded-lg border border-line p-4">
           <TaskPanel projectId={projectId} initialTasks={initialTasks} stages={stages} stageFilter={stage.id} />
         </div>
       </div>

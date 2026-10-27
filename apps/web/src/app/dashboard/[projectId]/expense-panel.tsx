@@ -84,23 +84,25 @@ export function ExpensePanel({
     return stages.find((s) => s.id === id)?.name ?? t("noStage");
   }
 
+  const inputClass = "rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none";
+
   return (
     <section>
-      <h2 className="mb-3 text-xl font-semibold">{t("title")}</h2>
+      <h2 className="mb-3 font-display text-xl font-semibold">{t("title")}</h2>
       {expenses.length === 0 ? (
-        <p className="mb-4 text-base text-gray-600">{t("empty")}</p>
+        <p className="mb-4 text-base text-muted">{t("empty")}</p>
       ) : (
         <ul className="mb-4 flex flex-col gap-2">
           {expenses.map((expense) => (
             <li
               key={expense.id}
-              className="flex items-center justify-between rounded border border-gray-200 px-3 py-2"
+              className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
             >
               <div>
                 <p className="font-medium">
                   {expense.category} — {Number(expense.amount).toLocaleString("pl-PL")} {expense.currency}
                 </p>
-                <p className="text-base text-gray-600">
+                <p className="text-base text-muted">
                   {new Date(expense.date).toLocaleDateString("pl-PL")} · {stageName(expense.stageId)}
                   {expense.vendor ? ` · ${expense.vendor}` : ""}
                 </p>
@@ -109,7 +111,7 @@ export function ExpensePanel({
                 onClick={() => {
                   if (confirm(t("confirmDelete", { category: expense.category }))) deleteExpense.mutate(expense.id);
                 }}
-                className="text-base text-red-600 underline"
+                className="text-base text-danger underline"
               >
                 {tc("delete")}
               </button>
@@ -120,48 +122,31 @@ export function ExpensePanel({
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("category")}</span>
-          <input
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2 text-base"
-          />
+          <span className="text-base text-muted">{t("category")}</span>
+          <input value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("amount")}</span>
+          <span className="text-base text-muted">{t("amount")}</span>
           <input
             type="number"
             min="0"
             step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-28 rounded border border-gray-300 px-3 py-2 text-base"
+            className={`w-28 ${inputClass}`}
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("date")}</span>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2 text-base"
-          />
+          <span className="text-base text-muted">{t("date")}</span>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputClass} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("vendor")}</span>
-          <input
-            value={vendor}
-            onChange={(e) => setVendor(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2 text-base"
-          />
+          <span className="text-base text-muted">{t("vendor")}</span>
+          <input value={vendor} onChange={(e) => setVendor(e.target.value)} className={inputClass} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("stage")}</span>
-          <select
-            value={stageId}
-            onChange={(e) => setStageId(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2 text-base"
-          >
+          <span className="text-base text-muted">{t("stage")}</span>
+          <select value={stageId} onChange={(e) => setStageId(e.target.value)} className={inputClass}>
             <option value="">{t("noStage")}</option>
             {stages.map((stage) => (
               <option key={stage.id} value={stage.id}>
@@ -173,12 +158,12 @@ export function ExpensePanel({
         <button
           type="submit"
           disabled={createExpense.isPending}
-          className="rounded bg-gray-900 px-4 py-2 text-base text-white disabled:opacity-50"
+          className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
         >
           {t("add")}
         </button>
       </form>
-      {error && <p className="mt-2 text-base text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-base text-danger">{error}</p>}
     </section>
   );
 }
