@@ -166,10 +166,6 @@ export function ProjectWorkspace({
       </div>
       {actionError && <p className="mb-4 text-base text-danger">{actionError}</p>}
 
-      <div className="mb-8">
-        <MembersPanel projectId={projectId} initialMembers={initialMembers} />
-      </div>
-
       <div className="mb-8 grid grid-cols-3 gap-4">
         <SummaryCard label={t("summaryTargetBudget")} value={summary.targetBudget} />
         <SummaryCard label={t("summarySpent")} value={summary.totalSpent} />
@@ -202,7 +198,11 @@ export function ProjectWorkspace({
         <TaskPanel projectId={projectId} initialTasks={initialTasks} stages={stages} />
       </div>
 
-      <ReportPanel projectId={projectId} initialReports={initialReports} />
+      <div className="mb-8">
+        <ReportPanel projectId={projectId} initialReports={initialReports} />
+      </div>
+
+      <MembersPanel projectId={projectId} initialMembers={initialMembers} />
     </main>
   );
 }

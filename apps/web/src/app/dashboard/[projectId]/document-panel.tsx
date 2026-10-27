@@ -4,6 +4,7 @@ import { useRef, useState, FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
+import { Collapsible } from "@/components/collapsible";
 import { DOCUMENT_TYPES, type DocumentType, type ProjectDocument, type Stage } from "@/lib/types";
 
 export function DocumentPanel({
@@ -107,73 +108,79 @@ export function DocumentPanel({
       {documents.length === 0 ? (
         <p className="mb-4 text-base text-muted">{t("empty")}</p>
       ) : (
-        <ul className="mb-4 flex flex-col gap-2">
-          {documents.map((document) => (
-            <li
-              key={document.id}
-              className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
-            >
-              <div>
-                <a
-                  href={document.downloadUrl}
-                  className="font-medium text-accent underline"
-                  target="_blank"
-                  rel="noreferrer"
+        <div className="mb-4">
+          <Collapsible title={tc("listCount", { count: documents.length })}>
+            <ul className="flex flex-col gap-2">
+              {documents.map((document) => (
+                <li
+                  key={document.id}
+                  className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
                 >
-                  {typeLabels[document.type]}
-                </a>
-                <p className="text-base text-muted">
-                  {new Date(document.uploadedAt).toLocaleDateString("pl-PL")}
-                  {stageName(document.stageId) ? ` · ${stageName(document.stageId)}` : ""}
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  if (confirm(t("confirmDelete"))) deleteDocument.mutate(document.id);
-                }}
-                className="text-base text-danger underline"
-              >
-                {tc("delete")}
-              </button>
-            </li>
-          ))}
-        </ul>
+                  <div>
+                    <a
+                      href={document.downloadUrl}
+                      className="font-medium text-accent underline"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {typeLabels[document.type]}
+                    </a>
+                    <p className="text-base text-muted">
+                      {new Date(document.uploadedAt).toLocaleDateString("pl-PL")}
+                      {stageName(document.stageId) ? ` · ${stageName(document.stageId)}` : ""}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (confirm(t("confirmDelete"))) deleteDocument.mutate(document.id);
+                    }}
+                    className="text-base text-danger underline"
+                  >
+                    {tc("delete")}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </Collapsible>
+        </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1">
-          <span className="text-base text-muted">{t("type")}</span>
-          <select value={type} onChange={(e) => setType(e.target.value as DocumentType)} className={inputClass}>
-            {DOCUMENT_TYPES.map((value) => (
-              <option key={value} value={value}>
-                {typeLabels[value]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-base text-muted">{t("stage")}</span>
-          <select value={stageId} onChange={(e) => setStageId(e.target.value)} className={inputClass}>
-            <option value="">{t("noStage")}</option>
-            {stages.map((stage) => (
-              <option key={stage.id} value={stage.id}>
-                {stage.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-base text-muted">{t("file")}</span>
-          <input ref={fileInputRef} type="file" required className="text-base" />
-        </label>
-        <button
-          type="submit"
-          disabled={uploadDocument.isPending}
-          className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
-        >
-          {uploadDocument.isPending ? t("uploading") : t("add")}
-        </button>
-      </form>
+      <Collapsible title={t("add")}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-base text-muted">{t("type")}</span>
+            <select value={type} onChange={(e) => setType(e.target.value as DocumentType)} className={inputClass}>
+              {DOCUMENT_TYPES.map((value) => (
+                <option key={value} value={value}>
+                  {typeLabels[value]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-base text-muted">{t("stage")}</span>
+            <select value={stageId} onChange={(e) => setStageId(e.target.value)} className={inputClass}>
+              <option value="">{t("noStage")}</option>
+              {stages.map((stage) => (
+                <option key={stage.id} value={stage.id}>
+                  {stage.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-base text-muted">{t("file")}</span>
+            <input ref={fileInputRef} type="file" required className="text-base" />
+          </label>
+          <button
+            type="submit"
+            disabled={uploadDocument.isPending}
+            className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
+          >
+            {uploadDocument.isPending ? t("uploading") : t("add")}
+          </button>
+        </form>
+      </Collapsible>
       {error && <p className="mt-2 text-base text-danger">{error}</p>}
     </section>
   );

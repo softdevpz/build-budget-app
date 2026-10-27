@@ -7,15 +7,40 @@ export type ReportData = {
   expenses: Expense[];
 };
 
+// pdfkit's built-in fonts (Helvetica, Times, …) are the 14 standard PDF
+// fonts, which only cover WinAnsi/Latin-1 — Polish diacritics (ą ć ę ł ń ó
+// ś ź ż) silently come out as other characters. DejaVu Sans is a free,
+// embeddable TTF with full Latin Extended-A coverage, so it's registered
+// as the document's font instead.
+const FONT_REGULAR = require.resolve('dejavu-fonts-ttf/ttf/DejaVuSans.ttf');
+const FONT_BOLD = require.resolve('dejavu-fonts-ttf/ttf/DejaVuSans-Bold.ttf');
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Zaplanowany',
+  in_progress: 'W trakcie',
+  done: 'Zakończony',
+};
+
+function statusLabel(status: string): string {
+  return STATUS_LABELS[status] ?? status;
+}
+
 function formatCurrency(amount: number, currency: string): string {
-  return `${amount.toFixed(2)} ${currency}`;
+  return `${amount.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
+}
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString('pl-PL');
 }
 
 export function buildReportPdf(data: ReportData): Promise<Buffer> {
   const { project, stages, expenses } = data;
 
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ margin: 50 });
+    const doc = new PDFDocument({ margin: 50, font: FONT_REGULAR });
+    doc.registerFont('body', FONT_REGULAR);
+    doc.registerFont('bold', FONT_BOLD);
+
     const chunks: Buffer[] = [];
     doc.on('data', (chunk: Buffer) => chunks.push(chunk));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
@@ -24,49 +49,51 @@ export function buildReportPdf(data: ReportData): Promise<Buffer> {
     const targetBudget = project.targetBudget ? Number(project.targetBudget) : null;
     const totalSpent = expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
 
-    doc.fontSize(20).text('Construction Budget Report', { align: 'center' });
+    doc.font('bold').fontSize(20).text('Raport budżetu budowy', { align: 'center' });
     doc.moveDown();
 
-    doc.fontSize(12).text(`Project: ${project.name}`);
-    if (project.address) doc.text(`Address: ${project.address}`);
-    if (project.startDate) doc.text(`Start date: ${project.startDate.toISOString().slice(0, 10)}`);
-    doc.text(`Status: ${project.status}`);
-    doc.text(`Generated: ${new Date().toISOString().slice(0, 10)}`);
+    doc.font('body').fontSize(12);
+    doc.text(`Projekt: ${project.name}`);
+    if (project.address) doc.text(`Adres: ${project.address}`);
+    if (project.startDate) doc.text(`Data rozpoczęcia: ${formatDate(project.startDate)}`);
+    doc.text(`Status: ${statusLabel(project.status)}`);
+    doc.text(`Wygenerowano: ${formatDate(new Date())}`);
     doc.moveDown();
 
-    doc.fontSize(14).text('Budget summary');
-    doc.fontSize(12);
-    doc.text(`Target budget: ${targetBudget !== null ? formatCurrency(targetBudget, 'PLN') : 'not set'}`);
-    doc.text(`Total spent: ${formatCurrency(totalSpent, 'PLN')}`);
+    doc.font('bold').fontSize(14).text('Podsumowanie budżetu');
+    doc.font('body').fontSize(12);
+    doc.text(`Budżet docelowy: ${targetBudget !== null ? formatCurrency(targetBudget, 'PLN') : 'nie ustawiono'}`);
+    doc.text(`Wydano łącznie: ${formatCurrency(totalSpent, 'PLN')}`);
     if (targetBudget !== null) {
-      doc.text(`Remaining: ${formatCurrency(targetBudget - totalSpent, 'PLN')}`);
+      doc.text(`Pozostało: ${formatCurrency(targetBudget - totalSpent, 'PLN')}`);
     }
     doc.moveDown();
 
-    doc.fontSize(14).text('Stages');
-    doc.fontSize(12);
+    doc.font('bold').fontSize(14).text('Etapy');
+    doc.font('body').fontSize(12);
     if (stages.length === 0) {
-      doc.text('No stages defined.');
+      doc.text('Brak etapów.');
     }
     for (const stage of stages) {
       const stageSpent = expenses
         .filter((expense) => expense.stageId === stage.id)
         .reduce((sum, expense) => sum + Number(expense.amount), 0);
-      const planned = stage.plannedBudget ? formatCurrency(Number(stage.plannedBudget), 'PLN') : 'not set';
-      doc.text(`- ${stage.name} (${stage.status}) — planned: ${planned}, spent: ${formatCurrency(stageSpent, 'PLN')}`);
+      const planned = stage.plannedBudget ? formatCurrency(Number(stage.plannedBudget), 'PLN') : 'nie ustawiono';
+      doc.text(
+        `- ${stage.name} (${statusLabel(stage.status)}) — planowane: ${planned}, wydano: ${formatCurrency(stageSpent, 'PLN')}`,
+      );
     }
     doc.moveDown();
 
-    doc.fontSize(14).text('Expenses');
-    doc.fontSize(10);
+    doc.font('bold').fontSize(14).text('Wydatki');
+    doc.font('body').fontSize(10);
     if (expenses.length === 0) {
-      doc.text('No expenses recorded.');
+      doc.text('Brak wydatków.');
     }
     for (const expense of expenses) {
-      const date = expense.date.toISOString().slice(0, 10);
       const vendor = expense.vendor ? ` — ${expense.vendor}` : '';
       doc.text(
-        `${date}  ${expense.category}${vendor}  ${formatCurrency(Number(expense.amount), expense.currency)}`,
+        `${formatDate(expense.date)}  ${expense.category}${vendor}  ${formatCurrency(Number(expense.amount), expense.currency)}`,
       );
     }
 

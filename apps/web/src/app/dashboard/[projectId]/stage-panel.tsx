@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
 import { getStageBudgetWarning } from "@/lib/budget-warning";
 import { useStageStatusLabels } from "@/lib/use-stage-status-labels";
+import { Collapsible } from "@/components/collapsible";
 import type { ProjectSummary, Stage, StageStatus } from "@/lib/types";
 
 export function StagePanel({
@@ -133,34 +134,36 @@ export function StagePanel({
         </ul>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1">
-          <span className="text-base text-muted">{t("namePlaceholder")}</span>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-base text-muted">{t("plannedBudgetPlaceholder")}</span>
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            value={plannedBudget}
-            onChange={(e) => setPlannedBudget(e.target.value)}
-            className="w-32 rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={createStage.isPending}
-          className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
-        >
-          {t("add")}
-        </button>
-      </form>
+      <Collapsible title={t("add")}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-base text-muted">{t("namePlaceholder")}</span>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-base text-muted">{t("plannedBudgetPlaceholder")}</span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={plannedBudget}
+              onChange={(e) => setPlannedBudget(e.target.value)}
+              className="w-32 rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={createStage.isPending}
+            className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
+          >
+            {t("add")}
+          </button>
+        </form>
+      </Collapsible>
       {error && <p className="mt-2 text-base text-danger">{error}</p>}
     </section>
   );

@@ -4,6 +4,7 @@ import { useRef, useState, FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ClientApiError } from "@/lib/api-client";
+import { Collapsible } from "@/components/collapsible";
 import type { DiaryEntry, Stage } from "@/lib/types";
 
 export function DiaryPanel({
@@ -106,82 +107,88 @@ export function DiaryPanel({
       {entries.length === 0 ? (
         <p className="mb-4 text-base text-muted">{t("empty")}</p>
       ) : (
-        <ul className="mb-4 flex flex-col gap-3">
-          {entries.map((entry) => (
-            <li key={entry.id} className="rounded-lg border border-line px-3 py-2">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-base text-muted">
-                    {new Date(entry.createdAt).toLocaleString("pl-PL")} · {entry.author.email}
-                    {stageName(entry.stageId) ? ` · ${stageName(entry.stageId)}` : ""}
-                  </p>
-                  <p className="mt-1 text-base">{entry.text}</p>
-                </div>
-                <button
-                  onClick={() => {
-                    if (confirm(t("confirmDelete"))) deleteEntry.mutate(entry.id);
-                  }}
-                  className="text-base text-danger underline"
-                >
-                  {tc("delete")}
-                </button>
-              </div>
-              {entry.photos.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {entry.photos.map((photo) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <a key={photo.id} href={photo.downloadUrl} target="_blank" rel="noreferrer">
-                      <img
-                        src={photo.downloadUrl}
-                        alt=""
-                        className="h-16 w-16 rounded border border-line object-cover"
-                      />
-                    </a>
-                  ))}
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
+        <div className="mb-4">
+          <Collapsible title={tc("listCount", { count: entries.length })}>
+            <ul className="flex flex-col gap-3">
+              {entries.map((entry) => (
+                <li key={entry.id} className="rounded-lg border border-line px-3 py-2">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-base text-muted">
+                        {new Date(entry.createdAt).toLocaleString("pl-PL")} · {entry.author.email}
+                        {stageName(entry.stageId) ? ` · ${stageName(entry.stageId)}` : ""}
+                      </p>
+                      <p className="mt-1 text-base">{entry.text}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (confirm(t("confirmDelete"))) deleteEntry.mutate(entry.id);
+                      }}
+                      className="text-base text-danger underline"
+                    >
+                      {tc("delete")}
+                    </button>
+                  </div>
+                  {entry.photos.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {entry.photos.map((photo) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <a key={photo.id} href={photo.downloadUrl} target="_blank" rel="noreferrer">
+                          <img
+                            src={photo.downloadUrl}
+                            alt=""
+                            className="h-16 w-16 rounded border border-line object-cover"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Collapsible>
+        </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={t("placeholder")}
-          rows={2}
-          className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
-        />
-        <div className="flex flex-col gap-3">
-          <label className="flex flex-col gap-1">
-            <span className="text-base text-muted">{t("stage")}</span>
-            <select
-              value={stageId}
-              onChange={(e) => setStageId(e.target.value)}
-              className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
+      <Collapsible title={t("add")}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={t("placeholder")}
+            rows={2}
+            className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
+          />
+          <div className="flex flex-col gap-3">
+            <label className="flex flex-col gap-1">
+              <span className="text-base text-muted">{t("stage")}</span>
+              <select
+                value={stageId}
+                onChange={(e) => setStageId(e.target.value)}
+                className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
+              >
+                <option value="">{t("noStage")}</option>
+                {stages.map((stage) => (
+                  <option key={stage.id} value={stage.id}>
+                    {stage.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-base text-muted">{t("photos")}</span>
+              <input ref={fileInputRef} type="file" accept="image/*" multiple className="text-base" />
+            </label>
+            <button
+              type="submit"
+              disabled={createEntry.isPending}
+              className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
             >
-              <option value="">{t("noStage")}</option>
-              {stages.map((stage) => (
-                <option key={stage.id} value={stage.id}>
-                  {stage.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-base text-muted">{t("photos")}</span>
-            <input ref={fileInputRef} type="file" accept="image/*" multiple className="text-base" />
-          </label>
-          <button
-            type="submit"
-            disabled={createEntry.isPending}
-            className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
-          >
-            {createEntry.isPending ? t("saving") : t("add")}
-          </button>
-        </div>
-      </form>
+              {createEntry.isPending ? t("saving") : t("add")}
+            </button>
+          </div>
+        </form>
+      </Collapsible>
       {error && <p className="mt-2 text-base text-danger">{error}</p>}
     </section>
   );
