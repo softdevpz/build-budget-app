@@ -58,23 +58,23 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
 
   return (
     <section>
-      <h2 className="mb-3 text-xl font-semibold">{t("title")}</h2>
+      <h2 className="mb-3 font-display text-xl font-semibold">{t("title")}</h2>
       <ul className="mb-4 flex flex-col gap-2">
         {members.map((member) => (
           <li
             key={member.id}
-            className="flex items-center justify-between rounded border border-gray-200 px-3 py-2"
+            className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
           >
             <div>
               <p className="font-medium">{member.user.email}</p>
-              <p className="text-base text-gray-600">{roleLabels[member.role]}</p>
+              <p className="text-base text-muted">{roleLabels[member.role]}</p>
             </div>
             {member.role !== "owner" && (
               <button
                 onClick={() => {
                   if (confirm(t("confirmRemove", { email: member.user.email }))) removeMember.mutate(member.id);
                 }}
-                className="text-base text-red-600 underline"
+                className="text-base text-danger underline"
               >
                 {tc("delete")}
               </button>
@@ -85,24 +85,24 @@ export function MembersPanel({ projectId, initialMembers }: { projectId: string;
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("emailLabel")}</span>
+          <span className="text-base text-muted">{t("emailLabel")}</span>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2 text-base"
+            className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
           />
         </label>
         <button
           type="submit"
           disabled={inviteMember.isPending}
-          className="rounded bg-gray-900 px-4 py-2 text-base text-white disabled:opacity-50"
+          className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
         >
           {t("invite")}
         </button>
       </form>
-      <p className="mt-1 text-base text-gray-600">{t("hint")}</p>
-      {error && <p className="mt-2 text-base text-red-600">{error}</p>}
+      <p className="mt-1 text-base text-muted">{t("hint")}</p>
+      {error && <p className="mt-2 text-base text-danger">{error}</p>}
     </section>
   );
 }

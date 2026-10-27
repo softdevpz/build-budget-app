@@ -97,11 +97,11 @@ export default function LoginPage() {
   if (challengeId) {
     return (
       <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
-        <h1 className="mb-2 text-2xl font-semibold">{t("twoFactorTitle")}</h1>
-        <p className="mb-6 text-base text-gray-600">{t("twoFactorSubtitle")}</p>
+        <h1 className="mb-2 font-display text-2xl font-semibold">{t("twoFactorTitle")}</h1>
+        <p className="mb-6 text-base text-muted">{t("twoFactorSubtitle")}</p>
         <form onSubmit={handleTwoFactorSubmit} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1">
-            <span className="text-base text-gray-700">{t("twoFactorCode")}</span>
+            <span className="text-base text-muted">{t("twoFactorCode")}</span>
             <input
               type="text"
               inputMode="numeric"
@@ -110,14 +110,14 @@ export default function LoginPage() {
               autoFocus
               value={twoFactorCode}
               onChange={(e) => setTwoFactorCode(e.target.value)}
-              className="rounded border border-gray-300 px-3 py-2"
+              className="rounded-lg border border-line bg-bg px-3 py-2 focus:border-accent focus:outline-none"
             />
           </label>
-          {error && <p className="text-base text-red-600">{error}</p>}
+          {error && <p className="text-base text-danger">{error}</p>}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded bg-gray-900 px-4 py-2 text-white disabled:opacity-50"
+            className="rounded-lg bg-accent-fill px-4 py-2 text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
           >
             {isSubmitting ? t("submitting") : t("twoFactorSubmit")}
           </button>
@@ -128,39 +128,39 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
-      <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
+      <h1 className="mb-6 font-display text-2xl font-semibold">{t("title")}</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("email")}</span>
+          <span className="text-base text-muted">{t("email")}</span>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2"
+            className="rounded-lg border border-line bg-bg px-3 py-2 focus:border-accent focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("password")}</span>
+          <span className="text-base text-muted">{t("password")}</span>
           <PasswordInput
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded border border-gray-300 px-3 py-2"
+            className="w-full rounded-lg border border-line bg-bg px-3 py-2 focus:border-accent focus:outline-none"
           />
         </label>
-        {error && <p className="text-base text-red-600">{error}</p>}
+        {error && <p className="text-base text-danger">{error}</p>}
         {needsVerification && (
-          <div className="rounded border border-amber-300 bg-amber-50 p-3 text-base">
+          <div className="rounded-lg border border-line bg-surface p-3 text-base">
             <p>{t("needsVerification")}</p>
             {resendStatus === "sent" ? (
-              <p className="mt-1 text-green-700">{t("resendSent")}</p>
+              <p className="mt-1 text-ok">{t("resendSent")}</p>
             ) : (
               <button
                 type="button"
                 onClick={handleResend}
                 disabled={resendStatus === "sending"}
-                className="mt-1 underline disabled:opacity-50"
+                className="mt-1 text-accent underline disabled:opacity-50"
               >
                 {resendStatus === "sending" ? t("resending") : t("resend")}
               </button>
@@ -170,27 +170,27 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded bg-gray-900 px-4 py-2 text-white disabled:opacity-50"
+          className="rounded-lg bg-accent-fill px-4 py-2 text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
         >
           {isSubmitting ? t("submitting") : t("submit")}
         </button>
       </form>
-      <div className="my-4 flex items-center gap-3 text-base text-gray-500">
-        <span className="h-px flex-1 bg-gray-200" />
+      <div className="my-4 flex items-center gap-3 text-base text-muted">
+        <span className="h-px flex-1 bg-line" />
         {t("orContinueWith")}
-        <span className="h-px flex-1 bg-gray-200" />
+        <span className="h-px flex-1 bg-line" />
       </div>
       {/* Plain navigation, not a fetch — this has to leave our origin so the
           browser lands on Google's own consent screen. */}
       <a
         href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google`}
-        className="rounded border border-gray-300 px-4 py-2 text-center"
+        className="rounded-lg border border-line px-4 py-2 text-center transition-colors hover:bg-surface"
       >
         {t("googleButton")}
       </a>
-      <p className="mt-4 text-base text-gray-600">
+      <p className="mt-4 text-base text-muted">
         {t("noAccount")}{" "}
-        <Link href="/register" className="underline">
+        <Link href="/register" className="text-accent underline">
           {t("registerLink")}
         </Link>
       </p>

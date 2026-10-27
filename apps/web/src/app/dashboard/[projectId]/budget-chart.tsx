@@ -16,7 +16,7 @@ export function BudgetChart({ summary }: { summary: ProjectSummary }) {
   ];
 
   if (data.length === 0) {
-    return <p className="text-base text-gray-600">Dodaj etap, żeby zobaczyć wykres budżetu.</p>;
+    return <p className="text-base text-muted">Dodaj etap, żeby zobaczyć wykres budżetu.</p>;
   }
 
   return (
@@ -28,8 +28,10 @@ export function BudgetChart({ summary }: { summary: ProjectSummary }) {
           <YAxis fontSize={12} />
           <Tooltip formatter={(value: number) => `${value.toLocaleString("pl-PL")} PLN`} />
           <Legend />
-          <Bar dataKey="planowane" fill="#9ca3af" name="Planowane" />
-          <Bar dataKey="wydane" fill="#111827" name="Wydane" />
+          {/* Recharts needs literal colors, not CSS vars — kept in sync by
+              hand with the --line/--accent tokens in globals.css. */}
+          <Bar dataKey="planowane" fill="#a39c92" name="Planowane" />
+          <Bar dataKey="wydane" fill="#c2470c" name="Wydane" />
         </BarChart>
       </ResponsiveContainer>
     </div>

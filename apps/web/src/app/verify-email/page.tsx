@@ -44,11 +44,11 @@ export default function VerifyEmailPage() {
       {status === "success" && <p>{t("success")}</p>}
       {status === "error" && (
         <>
-          <h1 className="mb-4 text-xl font-semibold">{t("errorTitle")}</h1>
-          <p className="text-gray-600">
+          <h1 className="mb-4 font-display text-xl font-semibold">{t("errorTitle")}</h1>
+          <p className="text-muted">
             {t.rich("errorBody", {
               login: (chunks) => (
-                <Link href="/login" className="underline">
+                <Link href="/login" className="text-accent underline">
                   {chunks}
                 </Link>
               ),

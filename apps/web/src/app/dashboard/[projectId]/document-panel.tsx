@@ -99,23 +99,30 @@ export function DocumentPanel({
     return stages.find((s) => s.id === id)?.name ?? null;
   }
 
+  const inputClass = "rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none";
+
   return (
     <section>
-      <h2 className="mb-3 text-xl font-semibold">{t("title")}</h2>
+      <h2 className="mb-3 font-display text-xl font-semibold">{t("title")}</h2>
       {documents.length === 0 ? (
-        <p className="mb-4 text-base text-gray-600">{t("empty")}</p>
+        <p className="mb-4 text-base text-muted">{t("empty")}</p>
       ) : (
         <ul className="mb-4 flex flex-col gap-2">
           {documents.map((document) => (
             <li
               key={document.id}
-              className="flex items-center justify-between rounded border border-gray-200 px-3 py-2"
+              className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
             >
               <div>
-                <a href={document.downloadUrl} className="font-medium underline" target="_blank" rel="noreferrer">
+                <a
+                  href={document.downloadUrl}
+                  className="font-medium text-accent underline"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   {typeLabels[document.type]}
                 </a>
-                <p className="text-base text-gray-600">
+                <p className="text-base text-muted">
                   {new Date(document.uploadedAt).toLocaleDateString("pl-PL")}
                   {stageName(document.stageId) ? ` · ${stageName(document.stageId)}` : ""}
                 </p>
@@ -124,7 +131,7 @@ export function DocumentPanel({
                 onClick={() => {
                   if (confirm(t("confirmDelete"))) deleteDocument.mutate(document.id);
                 }}
-                className="text-base text-red-600 underline"
+                className="text-base text-danger underline"
               >
                 {tc("delete")}
               </button>
@@ -135,12 +142,8 @@ export function DocumentPanel({
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("type")}</span>
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as DocumentType)}
-            className="rounded border border-gray-300 px-3 py-2 text-base"
-          >
+          <span className="text-base text-muted">{t("type")}</span>
+          <select value={type} onChange={(e) => setType(e.target.value as DocumentType)} className={inputClass}>
             {DOCUMENT_TYPES.map((value) => (
               <option key={value} value={value}>
                 {typeLabels[value]}
@@ -149,12 +152,8 @@ export function DocumentPanel({
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("stage")}</span>
-          <select
-            value={stageId}
-            onChange={(e) => setStageId(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2 text-base"
-          >
+          <span className="text-base text-muted">{t("stage")}</span>
+          <select value={stageId} onChange={(e) => setStageId(e.target.value)} className={inputClass}>
             <option value="">{t("noStage")}</option>
             {stages.map((stage) => (
               <option key={stage.id} value={stage.id}>
@@ -164,18 +163,18 @@ export function DocumentPanel({
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("file")}</span>
+          <span className="text-base text-muted">{t("file")}</span>
           <input ref={fileInputRef} type="file" required className="text-base" />
         </label>
         <button
           type="submit"
           disabled={uploadDocument.isPending}
-          className="rounded bg-gray-900 px-4 py-2 text-base text-white disabled:opacity-50"
+          className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
         >
           {uploadDocument.isPending ? t("uploading") : t("add")}
         </button>
       </form>
-      {error && <p className="mt-2 text-base text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-base text-danger">{error}</p>}
     </section>
   );
 }

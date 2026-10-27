@@ -51,72 +51,56 @@ export default function NewProjectPage() {
     }
   }
 
+  const inputClass = "rounded-lg border border-line bg-bg px-3 py-2 focus:border-accent focus:outline-none";
+
   return (
     <main className="mx-auto max-w-sm px-4 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
+      <h1 className="mb-6 font-display text-2xl font-semibold">{t("title")}</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("name")}</span>
-          <input
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2"
-          />
+          <span className="text-base text-muted">{t("name")}</span>
+          <input required value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("address")}</span>
-          <input
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2"
-          />
+          <span className="text-base text-muted">{t("address")}</span>
+          <input value={address} onChange={(e) => setAddress(e.target.value)} className={inputClass} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("region")}</span>
-          <input
-            value={region}
-            onChange={(e) => setRegion(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2"
-          />
+          <span className="text-base text-muted">{t("region")}</span>
+          <input value={region} onChange={(e) => setRegion(e.target.value)} className={inputClass} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("area")}</span>
+          <span className="text-base text-muted">{t("area")}</span>
           <input
             type="number"
             min="0"
             step="0.01"
             value={areaM2}
             onChange={(e) => setAreaM2(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2"
+            className={inputClass}
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("startDate")}</span>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2"
-          />
+          <span className="text-base text-muted">{t("startDate")}</span>
+          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className={inputClass} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("targetBudget")}</span>
+          <span className="text-base text-muted">{t("targetBudget")}</span>
           <input
             type="number"
             min="0"
             step="0.01"
             value={targetBudget}
             onChange={(e) => setTargetBudget(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2"
+            className={inputClass}
           />
         </label>
-        {error && <p className="text-base text-red-600">{error}</p>}
+        {error && <p className="text-base text-danger">{error}</p>}
         {planLimitReached && (
-          <p className="text-base text-red-600">
+          <p className="text-base text-danger">
             {t.rich("planLimitReached", {
               upgrade: (chunks) => (
-                <Link href="/billing" className="underline">
+                <Link href="/billing" className="text-accent underline">
                   {chunks}
                 </Link>
               ),
@@ -126,7 +110,7 @@ export default function NewProjectPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded bg-gray-900 px-4 py-2 text-white disabled:opacity-50"
+          className="rounded-lg bg-accent-fill px-4 py-2 text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
         >
           {isSubmitting ? t("submitting") : t("submit")}
         </button>

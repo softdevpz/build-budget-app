@@ -82,17 +82,19 @@ export function TaskPanel({
     return !task.done && task.dueDate && new Date(task.dueDate) < new Date();
   }
 
+  const inputClass = "rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none";
+
   return (
     <section>
-      <h2 className="mb-3 text-xl font-semibold">{t("title")}</h2>
+      <h2 className="mb-3 font-display text-xl font-semibold">{t("title")}</h2>
       {tasks.length === 0 ? (
-        <p className="mb-4 text-base text-gray-600">{t("empty")}</p>
+        <p className="mb-4 text-base text-muted">{t("empty")}</p>
       ) : (
         <ul className="mb-4 flex flex-col gap-2">
           {tasks.map((task) => (
             <li
               key={task.id}
-              className="flex items-center justify-between rounded border border-gray-200 px-3 py-2"
+              className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
             >
               <label className="flex items-center gap-2">
                 <input
@@ -101,9 +103,9 @@ export function TaskPanel({
                   onChange={(e) => toggleDone.mutate({ taskId: task.id, done: e.target.checked })}
                 />
                 <span>
-                  <p className={task.done ? "line-through text-gray-500" : "font-medium"}>{task.title}</p>
+                  <p className={task.done ? "line-through text-muted" : "font-medium"}>{task.title}</p>
                   {task.dueDate && (
-                    <p className={`text-base ${isOverdue(task) ? "text-red-600" : "text-gray-600"}`}>
+                    <p className={`text-base ${isOverdue(task) ? "text-danger" : "text-muted"}`}>
                       {t("dueDateLabel", { date: new Date(task.dueDate).toLocaleDateString("pl-PL") })}
                       {isOverdue(task) ? t("overdueSuffix") : ""}
                     </p>
@@ -114,7 +116,7 @@ export function TaskPanel({
                 onClick={() => {
                   if (confirm(t("confirmDelete", { title: task.title }))) deleteTask.mutate(task.id);
                 }}
-                className="text-base text-red-600 underline"
+                className="text-base text-danger underline"
               >
                 {tc("delete")}
               </button>
@@ -125,29 +127,16 @@ export function TaskPanel({
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("nameLabel")}</span>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2 text-base"
-          />
+          <span className="text-base text-muted">{t("nameLabel")}</span>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("dueDate")}</span>
-          <input
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2 text-base"
-          />
+          <span className="text-base text-muted">{t("dueDate")}</span>
+          <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={inputClass} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-base text-gray-700">{t("stage")}</span>
-          <select
-            value={stageId}
-            onChange={(e) => setStageId(e.target.value)}
-            className="rounded border border-gray-300 px-3 py-2 text-base"
-          >
+          <span className="text-base text-muted">{t("stage")}</span>
+          <select value={stageId} onChange={(e) => setStageId(e.target.value)} className={inputClass}>
             <option value="">{t("noStage")}</option>
             {stages.map((stage) => (
               <option key={stage.id} value={stage.id}>
@@ -159,12 +148,12 @@ export function TaskPanel({
         <button
           type="submit"
           disabled={createTask.isPending}
-          className="rounded bg-gray-900 px-4 py-2 text-base text-white disabled:opacity-50"
+          className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
         >
           {t("add")}
         </button>
       </form>
-      {error && <p className="mt-2 text-base text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-base text-danger">{error}</p>}
     </section>
   );
 }

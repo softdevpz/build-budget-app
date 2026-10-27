@@ -53,47 +53,47 @@ export function ReportPanel({ projectId, initialReports }: { projectId: string; 
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-xl font-semibold">{t("title")}</h2>
+        <h2 className="font-display text-xl font-semibold">{t("title")}</h2>
         <button
           onClick={() => requestReport.mutate()}
           disabled={requestReport.isPending}
-          className="rounded bg-gray-900 px-4 py-2 text-base text-white disabled:opacity-50"
+          className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
         >
           {t("generate")}
         </button>
       </div>
 
       {reports.length === 0 ? (
-        <p className="text-base text-gray-600">{t("empty")}</p>
+        <p className="text-base text-muted">{t("empty")}</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {reports.map((report) => (
             <li
               key={report.id}
-              className="flex items-center justify-between rounded border border-gray-200 px-3 py-2"
+              className="flex items-center justify-between rounded-lg border border-line px-3 py-2"
             >
               <div>
                 <p className="font-medium">{new Date(report.requestedAt).toLocaleString("pl-PL")}</p>
                 {report.status === "failed" && report.error && (
-                  <p className="text-base text-red-600">{report.error}</p>
+                  <p className="text-base text-danger">{report.error}</p>
                 )}
               </div>
               {report.status === "completed" ? (
                 <button
                   onClick={() => downloadReport.mutate(report.id)}
                   disabled={downloadReport.isPending}
-                  className="text-base underline disabled:opacity-50"
+                  className="text-base text-accent underline disabled:opacity-50"
                 >
                   {t("download")}
                 </button>
               ) : (
-                <span className="text-base text-gray-600">{statusLabels[report.status]}</span>
+                <span className="text-base text-muted">{statusLabels[report.status]}</span>
               )}
             </li>
           ))}
         </ul>
       )}
-      {error && <p className="mt-2 text-base text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-base text-danger">{error}</p>}
     </section>
   );
 }

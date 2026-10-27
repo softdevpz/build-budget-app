@@ -102,16 +102,16 @@ export function DiaryPanel({
 
   return (
     <section>
-      <h2 className="mb-3 text-xl font-semibold">{t("title")}</h2>
+      <h2 className="mb-3 font-display text-xl font-semibold">{t("title")}</h2>
       {entries.length === 0 ? (
-        <p className="mb-4 text-base text-gray-600">{t("empty")}</p>
+        <p className="mb-4 text-base text-muted">{t("empty")}</p>
       ) : (
         <ul className="mb-4 flex flex-col gap-3">
           {entries.map((entry) => (
-            <li key={entry.id} className="rounded border border-gray-200 px-3 py-2">
+            <li key={entry.id} className="rounded-lg border border-line px-3 py-2">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-base text-gray-600">
+                  <p className="text-base text-muted">
                     {new Date(entry.createdAt).toLocaleString("pl-PL")} · {entry.author.email}
                     {stageName(entry.stageId) ? ` · ${stageName(entry.stageId)}` : ""}
                   </p>
@@ -121,7 +121,7 @@ export function DiaryPanel({
                   onClick={() => {
                     if (confirm(t("confirmDelete"))) deleteEntry.mutate(entry.id);
                   }}
-                  className="text-base text-red-600 underline"
+                  className="text-base text-danger underline"
                 >
                   {tc("delete")}
                 </button>
@@ -134,7 +134,7 @@ export function DiaryPanel({
                       <img
                         src={photo.downloadUrl}
                         alt=""
-                        className="h-16 w-16 rounded border border-gray-200 object-cover"
+                        className="h-16 w-16 rounded border border-line object-cover"
                       />
                     </a>
                   ))}
@@ -151,15 +151,15 @@ export function DiaryPanel({
           onChange={(e) => setText(e.target.value)}
           placeholder={t("placeholder")}
           rows={2}
-          className="rounded border border-gray-300 px-3 py-2 text-base"
+          className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
         />
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1">
-            <span className="text-base text-gray-700">{t("stage")}</span>
+            <span className="text-base text-muted">{t("stage")}</span>
             <select
               value={stageId}
               onChange={(e) => setStageId(e.target.value)}
-              className="rounded border border-gray-300 px-3 py-2 text-base"
+              className="rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
             >
               <option value="">{t("noStage")}</option>
               {stages.map((stage) => (
@@ -170,19 +170,19 @@ export function DiaryPanel({
             </select>
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-base text-gray-700">{t("photos")}</span>
+            <span className="text-base text-muted">{t("photos")}</span>
             <input ref={fileInputRef} type="file" accept="image/*" multiple className="text-base" />
           </label>
           <button
             type="submit"
             disabled={createEntry.isPending}
-            className="rounded bg-gray-900 px-4 py-2 text-base text-white disabled:opacity-50"
+            className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
           >
             {createEntry.isPending ? t("saving") : t("add")}
           </button>
         </div>
       </form>
-      {error && <p className="mt-2 text-base text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-base text-danger">{error}</p>}
     </section>
   );
 }

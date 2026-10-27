@@ -1,3 +1,53 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Design tokens lifted from ziecina.dev, so this project and the portfolio
+   site it's a piece of share one visual identity. Light values first,
+   overridden under prefers-color-scheme: dark — same approach the
+   portfolio site uses (OS preference, no manual toggle). */
+:root {
+  --bg: #fbfaf8;
+  --surface: #f3f1ed;
+  --line: #e4e0d9;
+  --fg: #1b1916;
+  --muted: #6b655c;
+  --accent: #c2470c;
+  --accent-fill: #f07a1e;
+  --on-accent: #1d0f04;
+  --ok: #1f8a4c;
+  --danger: #d64545;
+}
+
+/* System preference applies only until the user picks explicitly (see
+   ThemeToggle, which then sets data-theme and wins either direction). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131211;
+    --surface: #1c1a18;
+    --line: #2e2b27;
+    --fg: #eeebe6;
+    --muted: #a39c92;
+    --accent: #ff9447;
+    --accent-fill: #f58025;
+    --ok: #4cc27f;
+    --danger: #e86a6a;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #131211;
+  --surface: #1c1a18;
+  --line: #2e2b27;
+  --fg: #eeebe6;
+  --muted: #a39c92;
+  --accent: #ff9447;
+  --accent-fill: #f58025;
+  --ok: #4cc27f;
+  --danger: #e86a6a;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+}

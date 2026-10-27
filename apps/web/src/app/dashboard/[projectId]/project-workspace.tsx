@@ -120,7 +120,7 @@ export function ProjectWorkspace({
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="rounded border border-gray-300 px-3 py-2 text-xl font-semibold"
+              className="rounded-lg border border-line bg-bg px-3 py-2 text-xl font-semibold focus:border-accent focus:outline-none"
             />
             <input
               type="number"
@@ -129,12 +129,12 @@ export function ProjectWorkspace({
               value={targetBudget}
               onChange={(e) => setTargetBudget(e.target.value)}
               placeholder={t("targetBudgetPlaceholder")}
-              className="w-40 rounded border border-gray-300 px-3 py-2 text-base"
+              className="w-40 rounded-lg border border-line bg-bg px-3 py-2 text-base focus:border-accent focus:outline-none"
             />
             <button
               type="submit"
               disabled={updateProject.isPending}
-              className="rounded bg-gray-900 px-4 py-2 text-base text-white disabled:opacity-50"
+              className="rounded-lg bg-accent-fill px-4 py-2 text-base text-on-accent transition-colors hover:bg-accent disabled:opacity-50"
             >
               {t("save")}
             </button>
@@ -144,8 +144,8 @@ export function ProjectWorkspace({
           </form>
         ) : (
           <div>
-            <h1 className="text-2xl font-semibold">{project.name}</h1>
-            {project.address && <p className="text-base text-gray-600">{project.address}</p>}
+            <h1 className="font-display text-2xl font-semibold">{project.name}</h1>
+            {project.address && <p className="text-base text-muted">{project.address}</p>}
           </div>
         )}
         {!isEditing && (
@@ -157,14 +157,14 @@ export function ProjectWorkspace({
               onClick={() => {
                 if (confirm(t("confirmDelete", { name: project.name }))) deleteProject.mutate();
               }}
-              className="text-base text-red-600 underline"
+              className="text-base text-danger underline"
             >
               {t("delete")}
             </button>
           </div>
         )}
       </div>
-      {actionError && <p className="mb-4 text-base text-red-600">{actionError}</p>}
+      {actionError && <p className="mb-4 text-base text-danger">{actionError}</p>}
 
       <div className="mb-8">
         <MembersPanel projectId={projectId} initialMembers={initialMembers} />
@@ -184,7 +184,7 @@ export function ProjectWorkspace({
         <StagePanel projectId={projectId} initialStages={stages} summary={summary} />
       </div>
 
-      <p className="mb-2 text-base font-medium uppercase tracking-wide text-gray-500">{t("unassignedHint")}</p>
+      <p className="mb-2 text-base font-medium uppercase tracking-wide text-muted">{t("unassignedHint")}</p>
 
       <div className="mb-8">
         <ExpensePanel projectId={projectId} initialExpenses={initialExpenses} stages={stages} />
@@ -209,8 +209,8 @@ export function ProjectWorkspace({
 
 function SummaryCard({ label, value }: { label: string; value: number | null }) {
   return (
-    <div className="rounded border border-gray-200 px-4 py-3">
-      <p className="text-base text-gray-600">{label}</p>
+    <div className="rounded-lg border border-line bg-surface px-4 py-3">
+      <p className="text-base text-muted">{label}</p>
       <p className="text-xl font-semibold">{value !== null ? `${value.toLocaleString("pl-PL")} PLN` : "—"}</p>
     </div>
   );
